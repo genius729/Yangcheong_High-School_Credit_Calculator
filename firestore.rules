@@ -1,0 +1,19 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isYangcheongAccount() {
+      return request.auth != null
+        && request.auth.token.email.matches('.*@yc\\.hs\\.kr$');
+    }
+
+    match /studentCalculatorStates/{userId} {
+      allow read, write: if isYangcheongAccount()
+        && request.auth.uid == userId;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,1452 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>양청고 이수학점 계산기 — 2022 개정 교육과정</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f0f2f5;--white:#fff;--panel:#f8f9fa;
+  --border:#d0d7e2;--border-light:#e8ecf2;
+  --text:#1a202c;--text2:#4a5568;--text3:#8a9bb0;
+  --blue:#1a73e8;--blue-l:#e8f0fe;--blue-d:#1557b0;
+  --green:#0f9d58;--red:#d93025;
+  --sh1:0 1px 3px rgba(0,0,0,.10);
+  --sh2:0 4px 16px rgba(0,0,0,.12);
+  --sh3:0 24px 48px rgba(0,0,0,.18);
+  --r:8px;--rs:6px;
+}
+html{font-size:13px;scroll-behavior:smooth}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* Header */
+.ph{background:var(--white);border-bottom:2px solid #CEEAFC;padding:0 20px;height:52px;
+    display:flex;align-items:center;justify-content:space-between;
+    position:sticky;top:0;z-index:200;box-shadow:var(--sh1)}
+.ph-left{display:flex;align-items:center;gap:10px}
+.ph-school{font-size:15px;font-weight:700;color:#1a73e8}
+.ph-divider{width:1px;height:18px;background:var(--border)}
+.ph-title{font-size:13px;font-weight:500;color:var(--text2)}
+.ph-right{display:flex;align-items:center;gap:14px}
+.ph-user{font-size:12px;color:var(--text2);text-align:right;line-height:1.6}
+.ph-user strong{color:var(--text);font-weight:600}
+
+/* Summary Strip */
+.dashboard-top{display:grid;grid-template-columns:1.9fr 1fr;gap:14px;margin-bottom:14px}
+.summary-card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:24px;box-shadow:0 10px 24px rgba(15,23,42,.06);display:flex;flex-direction:column;justify-content:space-between;min-height:216px;transition:transform .2s ease,box-shadow .2s ease}
+.summary-card:hover{transform:translateY(-1px)}
+.summary-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.summary-label{font-size:12px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.12em}
+.summary-total{font-size:42px;font-weight:800;color:#111827;line-height:1;margin-top:10px}
+.summary-sub{margin-top:6px;font-size:14px;color:#6b7280}
+.summary-progress{margin-top:24px}
+.progress-text{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#6b7280;margin-bottom:12px}
+.progress-bar{background:#e5e7eb;border-radius:999px;overflow:hidden;height:14px}
+.progress-track{height:100%;background:#2563eb;border-radius:999px;transition:width .4s ease}
+.summary-alert{margin-top:18px;display:inline-flex;align-items:center;gap:10px;background:#fef3f2;color:#b91c1c;padding:12px 14px;border-radius:14px;border:1px solid #fecaca;font-size:13px;font-weight:700}
+.mini-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.metric-card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:18px;display:flex;flex-direction:column;justify-content:space-between;transition:transform .2s ease,box-shadow .2s ease}
+.metric-card:hover{transform:translateY(-1px);box-shadow:0 12px 24px rgba(15,23,42,.08)}
+.metric-label{font-size:12px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.12em}
+.metric-value{font-size:24px;font-weight:800;color:#111827;line-height:1.1;margin-top:8px}
+.metric-meta{margin-top:6px;font-size:13px;color:#6b7280}
+
+/* Wrap */
+.wrap{max-width:1200px;margin:0 auto;padding:14px 12px 60px}
+
+/* Notice */
+.notice-bar{background:#f4f7ff;border:1px solid #d7e4f4;border-radius:16px;
+            padding:14px 18px;margin-bottom:14px;
+            display:flex;align-items:flex-start;gap:10px;font-size:11.5px;color:#1f4369;box-shadow:0 10px 24px rgba(26,115,232,.06)}
+.notice-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.notice-body{line-height:1.75}
+.notice-tag{display:inline-block;background:#1a73e8;color:#fff;
+            font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:999px;
+            margin-left:6px;vertical-align:middle}
+
+/* Table Card */
+.tc{background:var(--white);border:1px solid var(--border);border-radius:var(--r);
+    box-shadow:var(--sh1);overflow:hidden}
+.tc-hd{padding:10px 16px;border-bottom:1px solid var(--border-light);
+       display:flex;align-items:center;gap:8px;background:#CEEAFC}
+.tc-t{font-size:13px;font-weight:700;color:#1a4f7a}
+.tc-s{font-size:11px;color:#4a7fa5;margin-left:auto}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+.option-panel{background:#fff;border:1px solid #d7e4f4;border-radius:16px;padding:14px 18px;margin-bottom:14px;display:flex;gap:14px;flex-wrap:wrap;align-items:center;box-shadow:0 10px 24px rgba(15,23,42,.04)}
+.option-checkbox{display:flex;align-items:center;gap:10px;font-size:12.5px;color:#1f4369;cursor:pointer}
+.option-checkbox input{width:16px;height:16px;cursor:pointer}
+.status-panel{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.status-group{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:20px;box-shadow:0 10px 24px rgba(15,23,42,.04)}
+.status-group-title{font-size:13px;font-weight:800;color:#111827;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.status-list{display:flex;flex-direction:column;gap:10px}
+.status-item{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-top:1px solid #f3f4f6}
+.status-item:first-child{border-top:none}
+.status-item .label{font-size:14px;color:#111827}
+.status-item .value{font-family:'JetBrains Mono',monospace;font-size:13px;color:#6b7280}
+.status-item.danger .value{color:#ef4444;font-weight:700}
+.status-item.warning .value{color:#f59e0b;font-weight:700}
+.status-item.success .value{color:#22c55e;font-weight:700}
+.status-tags{display:flex;flex-wrap:wrap;gap:10px}
+.status-tag{background:#f8fafc;color:#111827;border:1px solid #e5e7eb;border-radius:999px;padding:10px 14px;font-size:13px;font-weight:600}
+.status-empty{font-size:14px;color:#6b7280;line-height:1.6}
+@media (max-width:1080px) {
+  .dashboard-top {grid-template-columns:1fr;}
+  .mini-metrics {grid-template-columns:repeat(2,minmax(0,1fr));}
+  .status-panel {grid-template-columns:1fr;}
+}
+@media (max-width:720px) {
+  .mini-metrics {grid-template-columns:1fr;}
+  .option-panel {flex-direction:column;align-items:flex-start;}
+  .status-group {padding:16px;}
+  .tc-hd {flex-direction:column;align-items:flex-start;gap:6px;}
+  .tc-s {margin-left:0;}
+}
+.warning-panel{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:20px;margin-bottom:14px;box-shadow:0 10px 24px rgba(15,23,42,.04)}
+.warning-title{font-size:13px;font-weight:800;margin-bottom:14px;color:#111827}
+.warning-list{font-size:13px;line-height:1.8;list-style:none;padding:0;margin:0}
+.warning-list li{padding:12px 0;border-top:1px solid #f3f4f6}
+.warning-list li:first-child{border-top:none}
+.warning-list strong{display:block;font-size:14px;color:#111827;margin-bottom:4px}
+.warning-detail{color:#6b7280;font-size:13px}
+.warning-empty{font-size:14px;color:#22c55e;font-weight:700}
+.warning-badge{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;font-size:13px;font-weight:700}
+.warning-badge.success{background:#dcfce7;color:#166534}
+.warning-badge.danger{background:#fee2e7;color:#b91c1c}
+.table-card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;box-shadow:0 10px 24px rgba(15,23,42,.04);overflow:hidden}
+.tc{background:transparent;border:none;box-shadow:none}
+.tc-hd{padding:18px 20px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;gap:10px;background:#fff}
+.tc-t{font-size:15px;font-weight:800;color:#111827}
+.tc-s{font-size:13px;color:#6b7280;margin-left:auto}
+.tw{overflow-x:auto}
+.table-body{width:100%;border-collapse:collapse;min-width:960px;font-size:13px}
+thead th{position:sticky;top:0;z-index:2;background:#f8fafc;border:1px solid #e5e7eb;padding:10px 12px;text-align:center;font-weight:700;font-size:12px;color:#111827;white-space:nowrap}
+tbody td{border:1px solid #e5e7eb;padding:10px 12px;text-align:center;vertical-align:middle;font-size:12.5px;line-height:1.5;color:#111827;background:#fff}
+tbody tr:hover{background:#f8fbff}
+.req-empty{background:#f9fafc;color:#6b7280;text-align:center;font-size:12px}
+.req-cross{background:#eef4ff;color:#2563eb;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12.5px;text-align:center}
+.slot{cursor:pointer;transition:transform .2s ease,box-shadow .2s ease;background:#f8fafc}
+.slot:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(37,99,235,.12)}
+.slot.chosen{background:linear-gradient(135deg,#2563eb,#60a5fa);color:#fff;box-shadow:0 6px 18px rgba(37,99,235,.18)}
+.slot-na{background:#f3f4f6;color:#9ca3af;font-size:11px;text-align:center}
+.slot-inner{display:flex;align-items:center;justify-content:center;min-height:34px;gap:6px;flex-direction:column;padding:4px 4px}
+.slot-cr{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700}
+.slot-name{font-size:10.5px;font-weight:700;max-width:76px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.slot-check{font-size:10px;color:inherit}
+.sum-row td{background:#f8fafc;font-weight:700;font-size:12px;font-family:'JetBrains Mono',monospace;border-top:2px solid #e5e7eb}
+
+/* Table */
+table{border-collapse:collapse;width:100%;min-width:960px;font-size:11.5px}
+thead th{background:#CEEAFC;border:1px solid #aac8e0;padding:6px 8px;
+         text-align:center;font-weight:700;font-size:11px;color:#1a4f7a;white-space:nowrap}
+tbody td{border:1px solid #cfd8e3;padding:5px 8px;
+         text-align:center;vertical-align:middle;font-size:11.5px;line-height:1.35}
+
+td.div-cell{background:#EFF7FC;font-weight:600;font-size:10.5px;color:var(--text2);text-align:center;white-space:nowrap}
+td.cat-cell{background:#EFF7FC;font-weight:600;font-size:10.5px;color:var(--text2);text-align:center;white-space:nowrap}
+td.sub-cell{background:#EFF7FC;font-size:10.5px;color:var(--text2);text-align:center}
+td.name-cell{text-align:left;padding-left:10px;color:var(--text);min-width:150px;white-space:nowrap}
+td.cr-cell{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:11.5px;color:var(--text2);background:#f8f9fc;text-align:center}
+td.stat-cell{background:#f8f9fc;font-family:'JetBrains Mono',monospace;font-weight:600;font-size:11px;color:var(--text2);text-align:center}
+
+td.req-filled{background:#fff;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12px;color:#1a4f7a;text-align:center}
+td.req-empty{background:#f9f9fb;color:#c8d2de;text-align:center;font-size:11px}
+td.req-cross{background:#f5f5ff;font-family:'JetBrains Mono',monospace;font-weight:600;font-size:11.5px;color:#7070c0;text-align:center}
+
+td.slot{cursor:pointer;transition:filter .12s,box-shadow .12s;min-width:64px;position:relative}
+td.slot:hover{filter:brightness(.88);box-shadow:inset 0 0 0 2px rgba(0,0,0,.22)}
+td.slot.chosen{box-shadow:inset 0 0 0 2.5px rgba(0,0,0,.32)}
+td.slot-na{background:#f9f9fb;color:#c8d2de;font-size:10px;text-align:center}
+
+.slot-inner{display:flex;align-items:center;justify-content:center;min-height:28px;gap:3px;flex-direction:column;padding:2px 0}
+.slot-cr{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:#1a202c}
+.slot-name{font-size:9px;font-weight:600;color:rgba(0,0,0,.6);max-width:72px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.slot-hint{font-size:10px;color:rgba(0,0,0,.35)}
+.slot-check{position:absolute;top:2px;right:3px;font-size:9px;color:rgba(0,0,0,.45)}
+
+tr.sum-row td{background:#EFF7FC;font-weight:700;font-size:11.5px;
+              font-family:'JetBrains Mono',monospace;border-top:2px solid #aac8e0}
+tr.sum-row td:first-child{font-family:'Noto Sans KR',sans-serif;text-align:right;padding-right:10px;font-size:11px;font-weight:700}
+
+/* Overlay & Panel */
+.overlay{position:fixed;inset:0;background:rgba(10,18,35,.5);backdrop-filter:blur(4px);
+         z-index:400;display:flex;align-items:stretch;justify-content:flex-end;animation:fadeIn .18s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideIn{from{transform:translateX(24px);opacity:0}to{transform:translateX(0);opacity:1}}
+.sp{background:var(--white);width:420px;max-width:100vw;display:flex;flex-direction:column;
+    box-shadow:var(--sh3);animation:slideIn .22s cubic-bezier(.4,0,.2,1)}
+.sp-hd{padding:18px 18px 14px;border-bottom:1px solid var(--border-light);
+       display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.sp-sem{display:inline-block;font-size:9.5px;font-weight:700;letter-spacing:.08em;
+        padding:2px 8px;border-radius:3px;margin-bottom:6px;text-transform:uppercase}
+.sp-title{font-size:15px;font-weight:700;line-height:1.3;color:var(--text)}
+.sp-desc{font-size:11px;color:var(--text3);margin-top:4px;line-height:1.6}
+.btn-x{width:30px;height:30px;border-radius:50%;border:1px solid var(--border);
+       background:var(--panel);cursor:pointer;display:flex;align-items:center;
+       justify-content:center;font-size:14px;color:var(--text3);flex-shrink:0;transition:all .15s}
+.btn-x:hover{background:#fee2e2;border-color:#fca5a5;color:var(--red)}
+.sp-body{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:6px}
+.sec-lbl{padding:3px 0 7px;font-size:9.5px;font-weight:700;letter-spacing:.1em;
+         text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border-light);margin-bottom:2px}
+
+.co{border:1.5px solid var(--border);border-radius:var(--rs);padding:10px 12px;
+    cursor:pointer;transition:all .16s;display:flex;align-items:center;gap:10px;background:var(--white)}
+.co:hover{border-color:var(--blue);background:var(--blue-l);transform:translateX(2px)}
+.co.disabled{border-color:#e2e8f0;color:#94a3b8;cursor:not-allowed;background:#f8fafc}
+.co.disabled .co-radio{border-color:#d1d5db;background:#f1f5f9}
+.co.disabled .co-name{color:#94a3b8}
+.co.disabled .co-meta span:last-child{color:#94a3b8}
+.co.act{border-color:var(--blue);background:var(--blue-l);box-shadow:0 2px 8px rgba(26,115,232,.15)}
+.co.act .co-name{color:var(--blue);font-weight:700}
+.co-radio{width:17px;height:17px;border-radius:50%;border:2px solid var(--border);
+          display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.co.act .co-radio{border-color:var(--blue);background:var(--blue)}
+.co-dot{width:5px;height:5px;border-radius:50%;background:#fff;opacity:0;transition:opacity .15s}
+.co.act .co-dot{opacity:1}
+.co-info{flex:1}
+.co-name{font-size:12.5px;font-weight:600;color:var(--text);margin-bottom:3px}
+.co-meta{font-size:10px;color:var(--text3);display:flex;gap:5px;flex-wrap:wrap}
+.co-meta span{background:var(--panel);border:1px solid var(--border-light);padding:1px 5px;border-radius:3px}
+.co-cr{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--text2);flex-shrink:0}
+.co.act .co-cr{color:var(--blue)}
+
+.none-opt{border:1.5px dashed var(--border);border-radius:var(--rs);padding:9px 12px;
+          cursor:pointer;transition:all .16s;display:flex;align-items:center;gap:9px;
+          color:var(--text3);font-size:11.5px}
+.none-opt:hover{border-color:var(--red);color:var(--red);background:#fff5f5}
+.none-opt.act{border-color:#fca5a5;background:#fff5f5;color:var(--red)}
+
+.sp-ft{padding:12px 14px;border-top:1px solid var(--border-light);background:var(--panel)}
+.btn-ok{width:100%;height:40px;border-radius:var(--rs);border:none;background:var(--blue);
+        color:#fff;font-size:13px;font-weight:700;font-family:'Noto Sans KR',sans-serif;
+        cursor:pointer;transition:all .16s}
+.btn-ok:hover{background:var(--blue-d);box-shadow:0 4px 14px rgba(26,115,232,.35)}
+.btn-ok:active{transform:scale(.98)}
+
+/* Toast */
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);
+       background:#1a202c;color:#fff;padding:9px 20px;border-radius:99px;
+       font-size:12.5px;font-weight:500;box-shadow:var(--sh2);z-index:999;
+       animation:toastIn .28s cubic-bezier(.4,0,.2,1);white-space:nowrap}
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+/* Login */
+.login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(180deg,#eef6ff 0%,#f8fafc 100%)}
+.login-panel{width:min(420px,100%);background:#fff;border:1px solid #d7e4f4;border-radius:16px;padding:30px;box-shadow:0 24px 48px rgba(15,23,42,.12);text-align:center}
+.login-logo{width:72px;height:72px;border-radius:18px;background:#1a73e8;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;margin-bottom:18px}
+.login-title{font-size:22px;font-weight:800;color:#111827;margin-bottom:8px}
+.login-desc{font-size:13px;line-height:1.7;color:#6b7280;margin-bottom:22px}
+.google-login-btn{height:46px;width:100%;border:1px solid #d0d7e2;border-radius:8px;background:#fff;color:#111827;font-size:14px;font-weight:700;font-family:'Noto Sans KR',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:box-shadow .15s,transform .15s}
+.google-login-btn:hover{box-shadow:0 8px 18px rgba(26,115,232,.14);transform:translateY(-1px)}
+.login-error{margin-top:14px;color:#b91c1c;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px 12px;font-size:12.5px;line-height:1.5}
+.app-shell{display:grid;grid-template-columns:280px minmax(0,1fr);gap:16px;max-width:1480px;margin:0 auto;padding:14px 12px 60px}
+.profile-sidebar{position:sticky;top:66px;align-self:start;background:#fff;border:1px solid #d7e4f4;border-radius:16px;padding:18px;box-shadow:0 10px 24px rgba(15,23,42,.06)}
+.profile-card{text-align:left}
+.profile-photo{width:64px;height:64px;border-radius:50%;object-fit:cover;background:#e8f0fe;border:3px solid #fff;box-shadow:0 4px 12px rgba(15,23,42,.16);margin-bottom:12px}
+.profile-fallback{width:64px;height:64px;border-radius:50%;background:#1a73e8;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;margin-bottom:12px}
+.profile-name{font-size:17px;font-weight:800;color:#111827;margin-bottom:4px}
+.profile-email{display:block;color:#2563eb;font-size:12.5px;text-decoration:none;margin-bottom:12px;word-break:break-all}
+.profile-meta{display:flex;flex-direction:column;gap:8px;margin:14px 0}
+.profile-meta-row{display:flex;justify-content:space-between;gap:10px;border-top:1px solid #eef2f7;padding-top:8px;font-size:12.5px;color:#4b5563}
+.profile-meta-row strong{color:#111827}
+.logout-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+.logout-btn{height:36px;border-radius:8px;border:1px solid #d0d7e2;background:#fff;color:#374151;font-size:12px;font-weight:700;font-family:'Noto Sans KR',sans-serif;cursor:pointer}
+.logout-btn.danger{border-color:#fecaca;color:#b91c1c;background:#fff7f7}
+.grade-lock-notice{background:#ecfdf5;border:1px solid #bbf7d0;color:#166534;border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:13px;font-weight:700}
+.main-area{min-width:0}
+
+@media (max-width:980px){
+  .app-shell{grid-template-columns:1fr}
+  .profile-sidebar{position:static}
+  .profile-card{display:grid;grid-template-columns:auto 1fr;gap:0 14px}
+  .profile-meta,.logout-row{grid-column:1 / -1}
+}
+@media (max-width:560px){
+  .login-panel{padding:24px 18px}
+  .profile-card{display:block}
+  .logout-row{grid-template-columns:1fr}
+}
+
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useCallback, useMemo, useEffect } = React;
+
+// ── 학기 ──
+const SEMESTERS = [
+  {key:'y1s1', label:'1학년 1학기', yr:1, sm:1},
+  {key:'y1s2', label:'1학년 2학기', yr:1, sm:2},
+  {key:'y2s1', label:'2학년 1학기', yr:2, sm:1},
+  {key:'y2s2', label:'2학년 2학기', yr:2, sm:2},
+  {key:'y3s1', label:'3학년 1학기', yr:3, sm:1},
+  {key:'y3s2', label:'3학년 2학기', yr:3, sm:2},
+];
+
+// ── 학교지정 필수 과목 ──
+// sem: 이수 학기, crossSem: 교차이수 표기 학기(괄호)
+const REQUIRED_SUBJECTS = [
+  // 국어
+  {id:'r01',div:'학교지정',cat:'국어',       sub:'공통',name:'공통국어1',        cr:3,sem:'y1s1'},
+  {id:'r02',div:'학교지정',cat:'국어',       sub:'공통',name:'공통국어2',        cr:4,sem:'y1s2'},
+  {id:'r03',div:'학교지정',cat:'국어',       sub:'일반',name:'문학',             cr:4,sem:'y2s1'},
+  {id:'r04',div:'학교지정',cat:'국어',       sub:'일반',name:'화법과 언어',       cr:4,sem:'y2s2'},
+  {id:'r05',div:'학교지정',cat:'국어',       sub:'일반',name:'독서와 작문',       cr:4,sem:'y3s1'},
+  // 수학
+  {id:'r06',div:'학교지정',cat:'수학',       sub:'공통',name:'공통수학1',        cr:4,sem:'y1s1'},
+  {id:'r07',div:'학교지정',cat:'수학',       sub:'공통',name:'공통수학2',        cr:4,sem:'y1s2'},
+  {id:'r08',div:'학교지정',cat:'수학',       sub:'일반',name:'대수',             cr:4,sem:'y2s1'},
+  {id:'r09',div:'학교지정',cat:'수학',       sub:'일반',name:'미적분Ⅰ',          cr:4,sem:'y2s2'},
+  {id:'r10',div:'학교지정',cat:'수학',       sub:'일반',name:'확률과 통계',       cr:4,sem:'y3s1'},
+  // 영어
+  {id:'r11',div:'학교지정',cat:'영어',       sub:'공통',name:'공통영어1',        cr:4,sem:'y1s1'},
+  {id:'r12',div:'학교지정',cat:'영어',       sub:'공통',name:'공통영어2',        cr:3,sem:'y1s2'},
+  {id:'r13',div:'학교지정',cat:'영어',       sub:'일반',name:'영어Ⅰ',           cr:4,sem:'y2s1'},
+  {id:'r14',div:'학교지정',cat:'영어',       sub:'일반',name:'영어Ⅱ',           cr:4,sem:'y2s2'},
+  {id:'r15',div:'학교지정',cat:'영어',       sub:'일반',name:'영어 독해와 작문', cr:4,sem:'y3s1'},
+  // 사회
+  {id:'r16',div:'학교지정',cat:'사회',       sub:'공통',name:'한국사1',          cr:3,sem:'y1s1'},
+  {id:'r17',div:'학교지정',cat:'사회',       sub:'공통',name:'한국사2',          cr:3,sem:'y1s2'},
+  {id:'r18',div:'학교지정',cat:'사회',       sub:'공통',name:'통합사회1',        cr:4,sem:'y1s1'},
+  {id:'r19',div:'학교지정',cat:'사회',       sub:'공통',name:'통합사회2',        cr:4,sem:'y1s2'},
+  // 과학
+  {id:'r20',div:'학교지정',cat:'과학',       sub:'공통',name:'통합과학1',        cr:4,sem:'y1s1'},
+  {id:'r21',div:'학교지정',cat:'과학',       sub:'공통',name:'통합과학2',        cr:4,sem:'y1s2'},
+  {id:'r22',div:'학교지정',cat:'과학',       sub:'공통',name:'과학탐구실험1',    cr:1,sem:'y1s1'},
+  {id:'r23',div:'학교지정',cat:'과학',       sub:'공통',name:'과학탐구실험2',    cr:1,sem:'y1s2'},
+  // 체육
+  {id:'r24',div:'학교지정',cat:'체육',       sub:'일반',name:'체육1',            cr:2,sem:'y1s1'},
+  {id:'r25',div:'학교지정',cat:'체육',       sub:'일반',name:'체육2',            cr:2,sem:'y1s2'},
+  {id:'r26',div:'학교지정',cat:'체육',       sub:'진로',name:'스포츠 문화',       cr:1,sem:'y3s1'},
+  {id:'r27',div:'학교지정',cat:'체육',       sub:'진로',name:'스포츠 과학',       cr:1,sem:'y3s2'},
+  {id:'r28',div:'학교지정',cat:'체육',       sub:'융합',name:'스포츠 생활1',      cr:2,sem:'y2s1'},
+  {id:'r29',div:'학교지정',cat:'체육',       sub:'융합',name:'스포츠 생활2',      cr:2,sem:'y2s2'},
+  // 예술 (교차이수)
+  {id:'r30',div:'학교지정',cat:'예술',       sub:'일반',name:'음악',             cr:2,sem:'y1s1',crossSem:'y1s2'},
+  {id:'r31',div:'학교지정',cat:'예술',       sub:'일반',name:'미술',             cr:2,sem:'y1s2',crossSem:'y1s1'},
+  {id:'r32',div:'학교지정',cat:'예술',       sub:'진로',name:'음악 감상과 비평', cr:3,sem:'y3s1',crossSem:'y3s2'},
+  {id:'r33',div:'학교지정',cat:'예술',       sub:'진로',name:'미술 창작',         cr:3,sem:'y3s2',crossSem:'y3s1'},
+  // 기술가정/정보 (교차이수)
+  {id:'r34',div:'학교지정',cat:'기술가정/정보',sub:'일반',name:'기술·가정',      cr:3,sem:'y1s1',crossSem:'y1s2'},
+  {id:'r35',div:'학교지정',cat:'기술가정/정보',sub:'일반',name:'정보',            cr:3,sem:'y1s2',crossSem:'y1s1'},
+];
+
+// ── 선택 슬롯 ──
+// 각 슬롯: 특정 학기(semKey)에 나타나는 1개 선택 가능한 색상 그룹
+const SLOTS = [
+  // 2학년 1학기
+  {id:'I-A',semKey:'y2s1',color:'#FFF2CC',div:'학생선택',cat:'국어',     label:'국어 계열 선택 (2-1)',
+   subjects:[
+    {id:'IA1',name:'주제 탐구 독서',sub:'진로',cr:3},
+    {id:'IA2',name:'문학과 영상',   sub:'진로',cr:3},
+    {id:'IA3',name:'기하',sub:'진로',cr:3},
+    {id:'IA4',name:'세계 문화와 영어', sub:'융합',cr:3},
+  ]},
+  {id:'I-B',semKey:'y2s1',color:'#C5E0B4',div:'학생선택',cat:'사회·과학',label:'사회·과학 선택 (2-1)',
+   subjects:[
+    {id:'IB1',name:'세계시민과 지리', sub:'일반',cr:3},
+    {id:'IB2',name:'세계사',          sub:'일반',cr:3},
+    {id:'IB3',name:'현대사회와 윤리',sub:'일반',cr:3},
+    {id:'IB4',name:'경제',            sub:'진로',cr:3},
+    {id:'IB5',name:'물리학',          sub:'일반',cr:3},
+    {id:'IB6',name:'화학',            sub:'일반',cr:3},
+    {id:'IB7',name:'생명과학',        sub:'일반',cr:3},
+    {id:'IB8',name:'지구과학',        sub:'일반',cr:3},
+  ]},
+  {id:'I-C',semKey:'y2s1',color:'#FFE699',div:'학생선택',cat:'기술·외국어·교양',label:'기술·외국어·교양 선택 (2-1)',
+   subjects:[
+    {id:'IC1',name:'인공지능 기초',sub:'진로',cr:3},
+    {id:'IC2',name:'데이터 과학', sub:'진로',cr:3},
+    {id:'IC3',name:'중국어',       sub:'일반',cr:3},
+    {id:'IC4',name:'일본어',       sub:'일반',cr:3},
+    {id:'IC5',name:'생태와 환경', sub:'일반',cr:3},
+    {id:'IC6',name:'인간과 심리', sub:'진로',cr:3},
+  ]},
+  // 2학년 2학기
+  {id:'J-A',semKey:'y2s2',color:'#DFEBF7',div:'학생선택',cat:'국어·수학',label:'국어·수학 계열 선택 (2-2)',
+   subjects:[
+    {id:'JA1',name:'주제 탐구 독서',sub:'진로',cr:3},
+    {id:'JA2',name:'문학과 영상',   sub:'진로',cr:3},
+    {id:'JA3',name:'기하',sub:'진로',cr:3},
+    {id:'JA4',name:'세계 문화와 영어', sub:'융합',cr:3},
+  ]},
+  {id:'J-B',semKey:'y2s2',color:'#F8CBAD',div:'학생선택',cat:'사회·과학',label:'사회·과학 선택 (2-2)',
+   subjects:[
+    {id:'JB1', name:'세계시민과 지리', sub:'일반',cr:3},
+    {id:'JB2', name:'세계사',          sub:'일반',cr:3},
+    {id:'JB3', name:'현대사회와 윤리',sub:'일반',cr:3},
+    {id:'JB4', name:'법과 사회',       sub:'진로',cr:3},
+    {id:'JB5', name:'도시의 미래 탐구',sub:'진로',cr:3},
+    {id:'JB6',name:'물리학',          sub:'일반',cr:3},
+    {id:'JB7',name:'화학',            sub:'일반',cr:3},
+    {id:'JB8', name:'생명과학',        sub:'일반',cr:3},
+    {id:'JB9',name:'지구과학',            sub:'일반',cr:3},
+    {id:'JB10', name:'역학과 에너지',  sub:'진로',cr:3},
+    {id:'JB11', name:'물질과 에너지',  sub:'진로',cr:3},
+    {id:'JB12', name:'세포와 물질대사',sub:'진로',cr:3},
+    {id:'JB13',name:'행성우주과학',    sub:'진로',cr:3},
+  ]},
+  {id:'J-C',semKey:'y2s2',color:'#BDD7EE',div:'학생선택',cat:'기술·외국어·교양',label:'기술·외국어·교양 선택 (2-2)',
+   subjects:[
+    {id:'JC1',name:'인공지능 기초',sub:'진로',cr:3},
+    {id:'JC2',name:'데이터 과학', sub:'진로',cr:3},
+    {id:'JC3',name:'중국어',      sub:'일반',cr:3},
+    {id:'JC4',name:'일본어',      sub:'일반',cr:3},
+    {id:'JC5',name:'생태와 환경',sub:'일반',cr:3},
+    {id:'JC6',name:'인간과 심리',sub:'진로',cr:3},
+  ]},
+  // 3학년 1학기
+  {id:'K-A',semKey:'y3s1',color:'#FBE5D6',div:'학생선택',cat:'주요교과',label:'주요 교과 선택 (3-1)',
+   subjects:[
+    {id:'KA1', name:'미적분Ⅱ',              sub:'진로',cr:3},
+    {id:'KA2', name:'수학과제 탐구',         sub:'융합',cr:3},
+    {id:'KA3', name:'독서 토론과 글쓰기',   sub:'융합',cr:3},
+    {id:'KA4', name:'영미 문학 읽기',       sub:'진로',cr:3},
+    {id:'KA5', name:'사회와 문화',          sub:'일반',cr:3},
+    {id:'KA6', name:'한국지리 탐구',        sub:'진로',cr:3},
+    {id:'KA7', name:'동아시아 역사 기행',   sub:'진로',cr:3},
+    {id:'KA8', name:'정치',                 sub:'진로',cr:3},
+    {id:'KA9', name:'윤리와 사상',          sub:'진로',cr:3},
+    {id:'KA10',name:'전자기와 양자',        sub:'진로',cr:3},
+    {id:'KA11',name:'화학 반응의 세계',     sub:'진로',cr:3},
+    {id:'KA12',name:'생물의 유전',          sub:'진로',cr:3},
+    {id:'KA13',name:'지구시스템과학',       sub:'진로',cr:3},
+  ]},
+  {id:'K-B',semKey:'y3s1',color:'#FFCCFF',div:'학생선택',cat:'기술·외국어·교양',label:'기술·외국어·교양 선택 (3-1)',
+   subjects:[
+    {id:'KB1',name:'창의 공학 설계',sub:'융합',cr:3},
+    {id:'KB2',name:'소프트웨어와 생활',     sub:'융합',cr:3},
+    {id:'KB3',name:'중국 문화',     sub:'융합',cr:3},
+    {id:'KB4',name:'일본 문화',     sub:'융합',cr:3},
+    {id:'KB5',name:'진로와 직업',   sub:'일반',cr:3},
+    {id:'KB6',name:'보건',          sub:'진로',cr:3},
+  ]},
+  // 3학년 2학기
+  {id:'L-A',semKey:'y3s2',color:'#B5C6E8',div:'학생선택',cat:'국어·수학·영어',label:'국어·수학·영어 선택 (3-2)',
+   subjects:[
+    {id:'LA1',name:'독서 토론과 글쓰기',    sub:'융합',cr:3},
+    {id:'LA2',name:'영미 문학 읽기',        sub:'진로',cr:3},
+    {id:'LA3',name:'언어생활 탐구',         sub:'융합',cr:3},
+    {id:'LA4',name:'경제수학',              sub:'융합',cr:3},
+    {id:'LA5',name:'수학과 문화',           sub:'융합',cr:3},
+    {id:'LA6',name:'심화 영어 독해와 작문',sub:'진로',cr:3},
+  ]},
+  {id:'L-B',semKey:'y3s2',color:'#CCFFCC',div:'학생선택',cat:'사회·과학',label:'사회·과학 선택 (3-2)',
+   subjects:[
+    {id:'LB1',name:'여행지리',                  sub:'융합',cr:3},
+    {id:'LB2',name:'역사로 탐구하는 현대 세계', sub:'융합',cr:3},
+    {id:'LB3',name:'사회문제 탐구',             sub:'융합',cr:3},
+    {id:'LB4',name:'금융과 경제생활',           sub:'융합',cr:3},
+    {id:'LB5',name:'윤리문제 탐구',             sub:'융합',cr:3},
+    {id:'LB6',name:'과학의 역사와 문화',        sub:'융합',cr:3},
+    {id:'LB7',name:'기후변화와 환경생태',       sub:'융합',cr:3},
+    {id:'LB8',name:'융합과학 탐구',             sub:'융합',cr:3},
+  ]},
+  {id:'L-C',semKey:'y3s2',color:'#DAE3F3',div:'학생선택',cat:'기술·외국어·교양',label:'기술·외국어·교양 선택 (3-2)',
+   subjects:[
+    {id:'LC1',name:'창의 공학 설계',sub:'융합',cr:3},
+    {id:'LC2',name:'소프트웨어와 생활',sub:'융합',cr:3},
+    {id:'LC3',name:'중국 문화',        sub:'융합',cr:3},
+    {id:'LC4',name:'일본 문화',        sub:'융합',cr:3},
+    {id:'LC5',name:'진로와 직업',      sub:'일반',cr:3},
+    {id:'LC6',name:'보건',             sub:'진로',cr:3},
+  ]},
+];
+
+const SLOT_MAX_SELECTIONS = {
+  // 이 객체만 수정하면 섹션별 최대 선택 개수를 통제할 수 있습니다.
+  'I-B': 3,
+  'J-B': 3,
+  'K-A': 3,
+  'L-A': 4,
+  'L-B': 3,
+  'Jt1': 1,
+  'Jt2': 1,
+  'On1': 2,
+  'On2': 2,
+};
+
+const JOINT_SLOTS = [
+  {id:'Jt1',semKey:'y2s2',color:'#d9eaf7',div:'공동교육과정',cat:'공동교육과정',label:'공동교육과정 선택 (2-2)',
+   subjects:[
+     {id:'Jt1a',name:'글로벌 리더십',sub:'진로',cr:3},
+     {id:'Jt1b',name:'융합 과학 탐구',sub:'융합',cr:3},
+   ]},
+  {id:'Jt2',semKey:'y3s1',color:'#d4f5e0',div:'공동교육과정',cat:'공동교육과정',label:'공동교육과정 선택 (3-1)',
+   subjects:[
+     {id:'Jt2a',name:'미래 사회와 기술',sub:'융합',cr:3},
+     {id:'Jt2b',name:'세계 시민과 윤리',sub:'일반',cr:3},
+   ]},
+];
+
+const ONLINE_SLOTS = [
+  {id:'On1',semKey:'y3s1',color:'#e8d9f7',div:'온라인학교',cat:'온라인학교',label:'온라인학교 선택 (3-1)',
+   subjects:[
+     {id:'On1a',name:'영어 회화',sub:'일반',cr:3},
+     {id:'On1b',name:'온라인 중국어',sub:'일반',cr:3},
+   ]},
+  {id:'On2',semKey:'y3s2',color:'#f7e0f2',div:'온라인학교',cat:'온라인학교',label:'온라인학교 선택 (3-2)',
+   subjects:[
+     {id:'On2a',name:'온라인 데이터 과학',sub:'진로',cr:3},
+     {id:'On2b',name:'온라인 생명 과학',sub:'일반',cr:3},
+  ]},
+];
+
+const GRADUATION_BASE_CREDITS = 174;
+const KME_BASE_MAX_CREDITS = 81;
+const EXTERNAL_KME_MAX_RATIO = 0.5;
+const DISPLAY_MAX_CREDITS = 192;
+
+const CATEGORY_REQUIREMENTS = [
+  {key:'국어',label:'국어',min:8,kind:'min'},
+  {key:'수학',label:'수학',min:8,kind:'min'},
+  {key:'영어',label:'영어',min:8,kind:'min'},
+  {key:'사회',label:'사회',min:14,kind:'min'},
+  {key:'과학',label:'과학',min:10,kind:'min'},
+  {key:'체육',label:'체육',min:10,kind:'min'},
+  {key:'예술',label:'예술',min:10,kind:'min'},
+  {key:'기술가정정보',label:'기술·가정·정보',min:16,kind:'min'},
+  {key:'국영수',label:'국영수 소계',max:KME_BASE_MAX_CREDITS,kind:'max'},
+  {key:'총',label:'총 이수학점',min:GRADUATION_BASE_CREDITS,kind:'min'},
+  {key:'체육학기',label:'체육 이수 학기',min:6,kind:'minSem'},
+];
+
+const PREREQUISITES = {
+  '영어Ⅱ':['영어Ⅰ'],
+  '미적분Ⅱ':['미적분Ⅰ'],
+  '역학과 에너지':['물리학'],
+  '전자기와 양자':['역학과 에너지'],
+  '물질과 에너지':['화학'],
+  '화학 반응의 세계':['물질과 에너지'],
+};
+
+const ALL_SLOTS = [...SLOTS, ...JOINT_SLOTS, ...ONLINE_SLOTS];
+const SLOT_MAP = Object.fromEntries(ALL_SLOTS.map(s=>[s.id,s]));
+ALL_SLOTS.forEach(s=>{ s.max = SLOT_MAX_SELECTIONS[s.id] ?? 1; });
+
+function normalizeGroup(subject){
+  if(subject.group) return subject.group;
+
+  const name = (subject.name||'').toLowerCase();
+  const cat = (subject.cat||'').toLowerCase();
+
+  // 명시적 교과군 정보가 있을 때만 그대로 사용하고, 공동교육과정/온라인학교 같은 특수 카테고리는 이름 기반으로 분류
+  if(/^(국어|수학|영어|사회|과학|체육|예술|기술가정정보)$/.test(cat)) return subject.cat;
+  if(/국어/.test(cat)) return '국어';
+  if(/수학/.test(cat)) return '수학';
+  if(/영어/.test(cat)) return '영어';
+  if(/사회/.test(cat)) return '사회';
+  if(/과학/.test(cat)) return '과학';
+  if(/체육/.test(cat)) return '체육';
+  if(/예술/.test(cat)) return '예술';
+  if(/기술|가정|정보/.test(cat)) return '기술가정정보';
+
+  if(/국어|독서|문학|화법|언어|글쓰기|토론/.test(name)) return '국어';
+  if(/수학|기하|미적분/.test(name)) return '수학';
+  if(/영어|영미/.test(name)) return '영어';
+  if(/사회|역사|지리|문화|정치|윤리|경제/.test(name)) return '사회';
+  if(/과학|물리|화학|생명|지구|융합과학|전기|전자기/.test(name)) return '과학';
+  if(/체육|스포츠|보건/.test(name)) return '체육';
+  if(/예술|음악|미술|감상|비평/.test(name)) return '예술';
+  return '기술가정정보';
+}
+
+function getSelectedSubjectNames(selections, excludeSlotId){
+  return Object.entries(selections).flatMap(([slotId, ids]) => {
+    if(slotId === excludeSlotId) return [];
+    const slot = SLOT_MAP[slotId];
+    return (ids || []).map(id => {
+      const subj = slot?.subjects.find(x=>x.id===id);
+      return subj?.name;
+    }).filter(Boolean);
+  });
+}
+
+function collectSubjects(selections, slots){
+  const selected = slots.flatMap(slot => (selections[slot.id] || []).map(id => {
+    const subj = slot.subjects.find(x=>x.id===id);
+    return subj ? {slot,subj} : null;
+  }).filter(Boolean));
+  return selected;
+}
+
+function getGroupCredits(selections, slots){
+  const credits = {};
+  REQUIRED_SUBJECTS.forEach(subj=>{
+    const group = normalizeGroup(subj);
+    credits[group] = (credits[group]||0) + subj.cr;
+  });
+  collectSubjects(selections, slots).forEach(({subj})=>{
+    const group = normalizeGroup(subj);
+    credits[group] = (credits[group]||0) + subj.cr;
+  });
+  return credits;
+}
+
+function getKMERule(total, 국영수){
+  const excessCredits = Math.max(0, total - GRADUATION_BASE_CREDITS);
+  const excessKME = Math.max(0, 국영수 - KME_BASE_MAX_CREDITS);
+  const allowed = total <= GRADUATION_BASE_CREDITS
+    ? KME_BASE_MAX_CREDITS
+    : KME_BASE_MAX_CREDITS + excessCredits * EXTERNAL_KME_MAX_RATIO;
+  const passed = total <= GRADUATION_BASE_CREDITS
+    ? 국영수 <= KME_BASE_MAX_CREDITS
+    : excessKME <= excessCredits * EXTERNAL_KME_MAX_RATIO;
+  const ratio = excessCredits > 0 ? excessKME / excessCredits : 0;
+  return { total, 국영수, excessCredits, excessKME, allowed, passed, ratio };
+}
+
+function isKMESubject(subj){
+  const group = normalizeGroup(subj);
+  return group === '국어' || group === '영어' || group === '수학';
+}
+
+function formatCredit(value){
+  return Number.isInteger(value) ? String(value) : value.toFixed(1);
+}
+
+function getExternalCreditAnalysis(selections, activeExternalSlots, baseCredits){
+  const externalSubjects = collectSubjects(selections, activeExternalSlots);
+  const externalCredits = externalSubjects.reduce((sum,{subj})=>sum + subj.cr, 0);
+  const externalKMECredits = externalSubjects.reduce((sum,{subj})=>sum + (isKMESubject(subj) ? subj.cr : 0), 0);
+  const totalCredits = baseCredits + externalCredits;
+  const excessCredits = Math.max(0, Math.min(externalCredits, totalCredits - GRADUATION_BASE_CREDITS));
+  const allowedExternalKME = excessCredits * EXTERNAL_KME_MAX_RATIO;
+  const externalRatio = excessCredits > 0 ? externalKMECredits / excessCredits : 0;
+  const status = excessCredits === 0
+    ? 'warning'
+    : externalKMECredits <= allowedExternalKME
+      ? 'success'
+      : 'danger';
+  const judgement = status === 'success' ? '적합' : status === 'warning' ? '주의' : '부적합';
+
+  return {
+    externalSubjects,
+    externalCredits,
+    externalKMECredits,
+    nonKMECredits: Math.max(0, excessCredits - externalKMECredits),
+    excessCredits,
+    allowedExternalKME,
+    externalRatio,
+    ratioPercent: excessCredits > 0 ? `${(externalRatio * 100).toFixed(1)}%` : '0.0%',
+    status,
+    judgement,
+  };
+}
+
+function getTotalCredits(selections, slots){
+  const requiredTotal = REQUIRED_SUBJECTS.reduce((a,r)=>a+r.cr,0);
+  const selectedTotal = collectSubjects(selections, slots).reduce((a,{subj})=>a+subj.cr,0);
+  return requiredTotal + selectedTotal;
+}
+
+function getPhysSemCount(selections, slots){
+  const semSet = new Set();
+  REQUIRED_SUBJECTS.forEach(subj=>{
+    if(normalizeGroup(subj) === '체육') semSet.add(subj.sem);
+  });
+  collectSubjects(selections, slots).forEach(({slot,subj})=>{
+    if(normalizeGroup(subj) === '체육') semSet.add(slot.semKey);
+  });
+  return semSet.size;
+}
+
+function getPrerequisiteWarnings(selections, slots){
+  const names = new Set([
+    ...REQUIRED_SUBJECTS.map(r=>r.name),
+    ...collectSubjects(selections, slots).map(({subj})=>subj.name),
+  ]);
+  return collectSubjects(selections, slots).flatMap(({subj})=>{
+    const missing = PREREQUISITES[subj.name]?.filter(pr => !names.has(pr)) || [];
+    if(missing.length === 0) return [];
+    return [{name:subj.name, missing}];
+  });
+}
+
+function getCategoryStates(selections, slots){
+  const credits = getGroupCredits(selections, slots);
+  const total = getTotalCredits(selections, slots);
+  const 국영수 = (credits['국어']||0) + (credits['영어']||0) + (credits['수학']||0);
+  const kmeState = getKMERule(total, 국영수);
+  const states = CATEGORY_REQUIREMENTS.map(req => {
+    if(req.key === '총') return { ...req, current: total, diff: total - req.min, passed: total >= req.min };
+    if(req.key === '국영수') return { ...req, max: KME_BASE_MAX_CREDITS, current: 국영수, diff: 국영수 - KME_BASE_MAX_CREDITS, passed: 국영수 <= KME_BASE_MAX_CREDITS };
+    if(req.key === '체육학기') return { ...req, current: getPhysSemCount(selections, slots), diff: getPhysSemCount(selections, slots) - req.min, passed: getPhysSemCount(selections, slots) >= req.min };
+    const current = credits[req.key]||0;
+    return { ...req, current, diff: current - req.min, passed: current >= req.min };
+  });
+  return states;
+}
+
+function getJointOnlineCountBySem(selections, semKey){
+  return [...JOINT_SLOTS, ...ONLINE_SLOTS].filter(slot=>slot.semKey===semKey)
+    .reduce((total,slot)=> total + ((selections[slot.id]||[]).length), 0);
+}
+
+function isJointOrOnlineSlot(slot){
+  return slot.div === '공동교육과정' || slot.div === '온라인학교';
+}
+
+function reqCrBySem(semKey){
+  return REQUIRED_SUBJECTS.filter(r=>r.sem===semKey).reduce((a,r)=>a+r.cr,0);
+}
+function selCrBySem(selections,semKey,slots=ALL_SLOTS){
+  return slots.filter(sl=>sl.semKey===semKey).reduce((total,sl)=>{
+    const ids = selections[sl.id] || [];
+    return total + ids.reduce((sum,id)=>{
+      const s = sl.subjects.find(x=>x.id===id);
+      return sum + (s?.cr||0);
+    }, 0);
+  },0);
+}
+function reqCountBySem(semKey){
+  return REQUIRED_SUBJECTS.filter(r=>r.sem===semKey).length;
+}
+function selCountBySem(selections,semKey,slots=ALL_SLOTS){
+  return slots.filter(sl=>sl.semKey===semKey).reduce((count,sl)=> count + ((selections[sl.id]||[]).length), 0);
+}
+
+// 교과군별 필수 과목 그룹핑
+function groupByCat(){
+  const order=[];
+  const map={};
+  REQUIRED_SUBJECTS.forEach(r=>{
+    if(!map[r.cat]){map[r.cat]=[];order.push(r.cat);}
+    map[r.cat].push(r);
+  });
+  return order.map(cat=>({cat,subjects:map[cat]}));
+}
+
+// 선택 슬롯의 학년을 semKey에서 읽어 학년별 표시 제한에 사용합니다.
+function getSlotGrade(slot){
+  const sem = SEMESTERS.find(item=>item.key===slot.semKey);
+  return sem?.yr || 0;
+}
+
+// 학년별로 현재 선택 가능한 학생 선택 슬롯만 남깁니다.
+function filterSlotsByGrade(slots, grade){
+  if(!grade) return slots;
+  return slots.filter(slot=>getSlotGrade(slot)===grade);
+}
+
+// 이미 이수한 이전 학년 필수 과목의 학점 합계를 자동 완료 처리합니다.
+function reqCompletedCrByGrade(grade){
+  if(!grade || grade <= 1) return 0;
+  return REQUIRED_SUBJECTS
+    .filter(subj=>{
+      const sem = SEMESTERS.find(item=>item.key===subj.sem);
+      return sem && sem.yr < grade;
+    })
+    .reduce((sum,subj)=>sum+subj.cr,0);
+}
+
+// 저장소에 넣을 계산 결과를 한 객체로 정리합니다.
+function buildCalculationResult({grand, reqTotal, selTotal, totalCnt, selDone, pct, adaptability, grade}){
+  return {grand, reqTotal, selTotal, totalCnt, selDone, pct, adaptability, grade};
+}
+
+// Toast
+function Toast({msg}){return <div className="toast">✓ {msg}</div>;}
+
+// 과목 선택 패널
+function Panel({slot,currentIds,selections,onSelect,onClose,showToast}){
+  const [localIds,setLocalIds]=useState(currentIds||[]);
+  const semLabel=SEMESTERS.find(s=>s.key===slot.semKey)?.label||'';
+  const chosenCount=localIds.length;
+  const unavailableNames = new Set(getSelectedSubjectNames(selections, slot.id));
+  const toggleItem=(subj)=>{
+    const isSelected = localIds.includes(subj.id);
+    const duplicatedElsewhere = unavailableNames.has(subj.name) && !isSelected;
+    if(isSelected){
+      setLocalIds(localIds.filter(id=>id!==subj.id));
+      return;
+    }
+    if(duplicatedElsewhere) return;
+    if(localIds.length >= slot.max) return;
+    setLocalIds([...localIds, subj.id]);
+  };
+  const confirm=()=>{
+    const nextSelections = {...selections, [slot.id]: localIds && localIds.length ? localIds : null};
+    if(isJointOrOnlineSlot(slot) && getJointOnlineCountBySem(nextSelections, slot.semKey) > 2){
+      showToast('같은 학기 공동교육과정과 온라인학교는 최대 2과목까지 선택할 수 있습니다.');
+      return;
+    }
+    onSelect(slot.id,localIds);
+    onClose();
+  };
+
+  return(
+    <div className="overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="sp">
+        <div className="sp-hd">
+          <div>
+            <div className="sp-sem" style={{background:slot.color,color:'#333'}}>{semLabel}</div>
+            <div className="sp-title">{slot.label}</div>
+            <div className="sp-desc">총 {slot.subjects.length}개 과목 중 최대 {slot.max}개 선택 · 각 3학점</div>
+          </div>
+          <button className="btn-x" onClick={onClose}>✕</button>
+        </div>
+        <div className="sp-body">
+          <div className="sec-lbl">선택 가능 과목 ({slot.subjects.length}개)</div>
+          {slot.subjects.map(subj=>{
+            const isSelected = localIds.includes(subj.id);
+            const isDisabled = !isSelected && unavailableNames.has(subj.name);
+            return(
+              <div key={subj.id} className={`co${isSelected?' act':''}${isDisabled ? ' disabled' : ''}`} onClick={()=>!isDisabled&&toggleItem(subj)}>
+                <div className="co-radio"><div className="co-dot"/></div>
+                <div className="co-info">
+                  <div className="co-name">{subj.name}</div>
+                  <div className="co-meta">
+                    <span>{subj.sub}</span>
+                    <span>3학점</span>
+                    {isDisabled&&<span style={{color:'#d93025'}}>중복 선택 불가</span>}
+                  </div>
+                </div>
+                <div className="co-cr">{subj.cr}<span style={{fontSize:'9px',fontWeight:400,color:'#8a9bb0'}}>학점</span></div>
+              </div>
+            );
+          })}
+          <div className={`none-opt${chosenCount===0?' act':''}`} onClick={()=>setLocalIds([])}>
+            <span style={{fontSize:'15px'}}>○</span>
+            <span>선택 안 함 (0학점)</span>
+          </div>
+        </div>
+        <div className="sp-ft">
+          <button className="btn-ok" onClick={confirm}>
+            {chosenCount > 0 ? `${chosenCount}개 선택 저장` : '선택 없이 저장'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// 필수 과목 행
+function ReqRow({subj,showCat,catRowspan}){
+  return(
+    <tr>
+      {showCat&&<td className="cat-cell" rowSpan={catRowspan}>{subj.cat}</td>}
+      <td className="sub-cell">{subj.sub}</td>
+      <td className="name-cell">{subj.name}</td>
+      <td className="cr-cell">{subj.cr}</td>
+      <td className="cr-cell">{subj.cr}</td>
+      {SEMESTERS.map(sem=>{
+        if(subj.sem===sem.key) return <td key={sem.key} className="req-filled"><b>{subj.cr}</b></td>;
+        if(subj.crossSem===sem.key) return <td key={sem.key} className="req-cross">({subj.cr})</td>;
+        return <td key={sem.key} className="req-empty"></td>;
+      })}
+      <td className="stat-cell">{subj.cr}</td>
+      <td className="stat-cell"></td>
+    </tr>
+  );
+}
+
+// 선택 슬롯 행
+function SlotRow({slot,selections,onCellClick}){
+  const selIds = selections[slot.id] || [];
+  const selSubjs = selIds.map(id=>slot.subjects.find(s=>s.id===id)).filter(Boolean);
+  const selectedCr = selSubjs.reduce((sum,s)=>sum + s.cr, 0);
+  const baseCreditText = [...new Set(slot.subjects.map(s=>s.cr).filter(cr=>cr != null))]
+    .sort((a,b)=>a-b)
+    .join('/');
+  const displayName = selSubjs.length === 0
+    ? null
+    : selSubjs.length === 1
+      ? selSubjs[0].name
+      : `${selSubjs[0].name} 외 ${selSubjs.length-1}개`;
+
+  return(
+    <tr>
+      <td className="cat-cell">{slot.cat}</td>
+      <td className="sub-cell">선택</td>
+      <td className="name-cell" style={{fontStyle:'italic',fontSize:'10.5px',color:'#4a5568'}}>
+        [{slot.label}]
+        {displayName&&<span style={{fontStyle:'normal',fontWeight:700,color:'#1a73e8',marginLeft:5}}>{displayName}</span>}
+      </td>
+      <td className="cr-cell">{baseCreditText || '-'}</td>
+      <td className="cr-cell">{selSubjs.length ? selectedCr : '-'}</td>
+      {SEMESTERS.map(sem=>{
+        if(sem.key!==slot.semKey) return <td key={sem.key} className="slot-na">-</td>;
+        return(
+          <td key={sem.key} className={`slot${selSubjs.length ? ' chosen' : ''}`}
+            style={{background:slot.color}}
+            onClick={()=>onCellClick(slot)}
+            title={`클릭 → 과목 선택: ${slot.label}`}>
+            <div className="slot-inner">
+              {selSubjs.length
+                ?<><span className="slot-cr">{selectedCr}</span><span className="slot-name">{displayName}</span><span className="slot-check">✓</span></>
+                :<span className="slot-hint">클릭</span>}
+            </div>
+          </td>
+        );
+      })}
+      <td className="stat-cell">{selSubjs.length ? selectedCr : ''}</td>
+      <td className="stat-cell"></td>
+    </tr>
+  );
+}
+
+// 로그인 전 중앙 화면입니다.
+function LoginScreen({error,onLogin}){
+  return(
+    <main className="login-screen">
+      <section className="login-panel">
+        <div className="login-logo">YC</div>
+        <h1 className="login-title">양청고 이수학점 계산기</h1>
+        <p className="login-desc">학교 Google Workspace 계정으로 로그인하면 학번과 학년을 자동으로 판별해 선택 가능한 과목을 보여줍니다.</p>
+        <button className="google-login-btn" onClick={onLogin}>
+          <span>G</span>
+          <span>Google 계정으로 로그인</span>
+        </button>
+        {error&&<div className="login-error">{error}</div>}
+      </section>
+    </main>
+  );
+}
+
+// 로그인 후 좌측에 표시되는 학생 프로필 카드입니다.
+function ProfileSidebar({profile,onLogoutKeep,onLogoutClear}){
+  const view = window.YCCUProfile?.getProfileViewModel(profile) || {
+    name: profile?.name || '',
+    email: profile?.email || '',
+    studentId: profile?.studentId || '-',
+    gradeText: profile?.grade ? `${profile.grade}학년` : '학년 확인 필요',
+    photoURL: profile?.photoURL || '',
+  };
+  const initial = view.name ? view.name.slice(0,1) : 'Y';
+
+  return(
+    <aside className="profile-sidebar">
+      <div className="profile-card">
+        {view.photoURL
+          ? <img className="profile-photo" src={view.photoURL} alt={`${view.name} 프로필 이미지`}/>
+          : <div className="profile-fallback">{initial}</div>}
+        <div>
+          <div className="profile-name">{view.name}</div>
+          <a className="profile-email" href={`mailto:${view.email}`}>{view.email}</a>
+        </div>
+        <div className="profile-meta">
+          <div className="profile-meta-row"><span>학번</span><strong>{view.studentId}</strong></div>
+          <div className="profile-meta-row"><span>현재 학년</span><strong>{view.gradeText}</strong></div>
+        </div>
+        <div className="logout-row">
+          <button className="logout-btn" onClick={onLogoutKeep}>로그아웃 · 저장 유지</button>
+          <button className="logout-btn danger" onClick={onLogoutClear}>로그아웃 · 삭제</button>
+        </div>
+      </div>
+    </aside>
+  );
+}
+
+function App(){
+  const [selections,setSelections]=useState({});
+  const [panelSlot,setPanelSlot]=useState(null);
+  const [toast,setToast]=useState(null);
+  const [jointEnabled,setJointEnabled]=useState(false);
+  const [onlineEnabled,setOnlineEnabled]=useState(false);
+  const [showRequired,setShowRequired]=useState(false);
+  const [authReady,setAuthReady]=useState(false);
+  const [authUser,setAuthUser]=useState(null);
+  const [profile,setProfile]=useState(null);
+  const [authError,setAuthError]=useState(null);
+  const [loginApi,setLoginApi]=useState(null);
+  const [storageApi,setStorageApi]=useState(null);
+  const [firestoreApi,setFirestoreApi]=useState(null);
+  const [hydrated,setHydrated]=useState(false);
+
+  const showToast=useCallback(msg=>{
+    setToast(msg);setTimeout(()=>setToast(null),2200);
+  },[]);
+
+  useEffect(()=>{
+    let unsubscribe = null;
+    let alive = true;
+
+    // Firebase/저장소 모듈은 ES Module로 분리되어 필요 시점에 동적으로 가져옵니다.
+    Promise.all([
+      import('./src/login.js'),
+      import('./src/storage.js'),
+      import('./src/profile.js'),
+      import('./firebase/firestore.js'),
+    ]).then(([loginModule, storageModule, profileModule, firestoreModule])=>{
+      if(!alive) return;
+
+      window.YCCUProfile = profileModule;
+      setLoginApi(loginModule);
+      setStorageApi(storageModule);
+      setFirestoreApi(firestoreModule);
+      unsubscribe = loginModule.initLoginController(({status,profile,user,error})=>{
+        setAuthReady(true);
+        setAuthError(error);
+        setProfile(profile);
+        setAuthUser(user || null);
+        if(status === 'signed-out') setHydrated(false);
+      });
+    }).catch(error=>{
+      setAuthReady(true);
+      setAuthError('Firebase 설정을 확인해 주세요. 로그인 기능을 초기화할 수 없습니다.');
+      console.error(error);
+    });
+
+    return ()=>{
+      alive = false;
+      if(unsubscribe) unsubscribe();
+    };
+  },[]);
+
+  useEffect(()=>{
+    if(!profile || !storageApi || hydrated) return;
+
+    // 로그인 후 LocalStorage에 저장된 선택 상태를 먼저 복원합니다.
+    const saved = storageApi.loadAppState();
+    if(saved){
+      setSelections(saved.selections || {});
+      setJointEnabled(Boolean(saved.jointEnabled));
+      setOnlineEnabled(Boolean(saved.onlineEnabled));
+      setShowRequired(Boolean(saved.showRequired));
+    }
+
+    setHydrated(true);
+  },[profile,storageApi,hydrated]);
+
+  const activeSlots=useMemo(()=>{
+    const slots=[...SLOTS];
+    if(jointEnabled) slots.push(...JOINT_SLOTS);
+    if(onlineEnabled) slots.push(...ONLINE_SLOTS);
+    return filterSlotsByGrade(slots, profile?.grade);
+  },[jointEnabled,onlineEnabled,profile]);
+
+  const activeExternalSlots=useMemo(()=>{
+    const slots=[];
+    if(jointEnabled) slots.push(...JOINT_SLOTS);
+    if(onlineEnabled) slots.push(...ONLINE_SLOTS);
+    return filterSlotsByGrade(slots, profile?.grade);
+  },[jointEnabled,onlineEnabled,profile]);
+
+  const selectedSubjects=useMemo(()=>collectSubjects(selections,activeSlots),[selections,activeSlots]);
+
+  const handleSelect=useCallback((slotId,subjIds)=>{
+    setSelections(prev=>({...prev,[slotId]:subjIds && subjIds.length ? subjIds : null}));
+    if(subjIds && subjIds.length){
+      const sl=SLOT_MAP[slotId];
+      const selected = subjIds.map(id=>sl?.subjects.find(x=>x.id===id)).filter(Boolean);
+      const names = selected.map(s=>s.name).join(', ');
+      const credits = selected.reduce((a,s)=>a+s.cr,0);
+      showToast(names?`"${names}" 선택됨 (${credits}학점)`:'선택됨');
+    }else showToast('선택 취소됨');
+  },[showToast]);
+
+  const handleLogin=useCallback(async()=>{
+    if(!loginApi) return;
+    setAuthError(null);
+    try{
+      await loginApi.loginWithGoogle();
+    }catch(error){
+      setAuthError(error?.message || '로그인 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
+    }
+  },[loginApi]);
+
+  const handleLogout=useCallback(async(clearLocalData)=>{
+    if(!loginApi) return;
+    try{
+      await loginApi.logout({clearLocalData});
+      setSelections({});
+      setJointEnabled(false);
+      setOnlineEnabled(false);
+      setShowRequired(false);
+      setProfile(null);
+      setAuthUser(null);
+      setHydrated(false);
+    }catch(error){
+      showToast('로그아웃 중 오류가 발생했습니다. 다시 시도해 주세요.');
+    }
+  },[loginApi,showToast]);
+
+  const toggleJointEnabled=useCallback(()=>{
+    setJointEnabled(prev=>!prev);
+  },[]);
+
+  const toggleOnlineEnabled=useCallback(()=>{
+    setOnlineEnabled(prev=>!prev);
+  },[]);
+
+  const semStats=useMemo(()=>
+    SEMESTERS.map(sem=>(
+      {
+      key:sem.key,
+      cr:reqCrBySem(sem.key)+selCrBySem(selections,sem.key,activeSlots),
+      cnt:reqCountBySem(sem.key)+selCountBySem(selections,sem.key,activeSlots),
+    }))
+  ,[selections,activeSlots]);
+
+  const reqTotal=useMemo(()=>SEMESTERS.reduce((a,sem)=>a+reqCrBySem(sem.key),0),[]);
+  const selTotal=useMemo(()=>selectedSubjects.reduce((sum,{subj})=>sum+subj.cr,0),[selectedSubjects]);
+  const grand=reqTotal+selTotal;
+  const totalCnt=semStats.reduce((a,s)=>a+s.cnt,0);
+  const selDone=selectedSubjects.length;
+  
+  // 학생선택 슬롯 개수 (공동교육과정, 온라인학교 제외)
+  const totalStudentSlots = activeSlots.filter(slot => slot.div === '학생선택').length;
+  const selectedStudentSlots = activeSlots.filter(slot => slot.div === '학생선택' && selections[slot.id]).length;
+  const pct = totalStudentSlots ? Math.round((selectedStudentSlots / totalStudentSlots) * 100) : 0;
+  
+  const creditDiff = grand - GRADUATION_BASE_CREDITS;
+
+  const categoryStates=useMemo(()=>getCategoryStates(selections,activeSlots),[selections,activeSlots]);
+  const adaptability = useMemo(()=>{
+    const allCategoryPassed = categoryStates.every(state => state.passed);
+    return creditDiff < 0 ? '부적합' : allCategoryPassed ? '적합' : '주의';
+  },[categoryStates, creditDiff]);
+  const prereqWarnings=useMemo(()=>getPrerequisiteWarnings(selections,activeSlots),[selections,activeSlots]);
+  const baseCreditsWithoutExternal=useMemo(()=>{
+    const activeGeneralSlots = activeSlots.filter(slot=>!isJointOrOnlineSlot(slot));
+    return reqTotal + collectSubjects(selections,activeGeneralSlots).reduce((sum,{subj})=>sum+subj.cr,0);
+  },[selections,activeSlots,reqTotal]);
+  const kmeAnalysis = useMemo(
+    ()=>getExternalCreditAnalysis(selections, activeExternalSlots, baseCreditsWithoutExternal),
+    [selections, activeExternalSlots, baseCreditsWithoutExternal]
+  );
+  const completedPreviousRequiredCredits = useMemo(()=>reqCompletedCrByGrade(profile?.grade),[profile]);
+  const calculationResult = useMemo(()=>buildCalculationResult({
+    grand, reqTotal, selTotal, totalCnt, selDone, pct, adaptability, grade:profile?.grade || null,
+  }),[grand, reqTotal, selTotal, totalCnt, selDone, pct, adaptability, profile]);
+
+  useEffect(()=>{
+    if(!profile || !storageApi || !hydrated) return;
+
+    // 사용자의 선택 상태와 계산 결과를 브라우저에 자동 저장합니다.
+    const payload = {
+      loginInfo: profile,
+      selections,
+      jointEnabled,
+      onlineEnabled,
+      showRequired,
+      calculationResult,
+    };
+    storageApi.saveAppState(payload);
+
+    // Firestore 저장 실패는 로컬 저장을 막지 않고 콘솔에만 기록합니다.
+    if(firestoreApi && authUser){
+      firestoreApi.saveUserCalculatorState(authUser, payload).catch(error=>console.warn('Firestore 저장 실패', error));
+    }
+  },[profile,storageApi,firestoreApi,authUser,hydrated,selections,jointEnabled,onlineEnabled,showRequired,calculationResult]);
+
+  const insufficiencies = categoryStates.filter(state=>!state.passed);
+  const satisfactions = categoryStates.filter(state=>state.passed);
+  const catGroups=useMemo(()=>groupByCat(),[]);
+
+  if(!authReady){
+    return <LoginScreen error="로그인 상태를 확인하는 중입니다." onLogin={()=>{}}/>;
+  }
+
+  if(!profile){
+    return <LoginScreen error={authError} onLogin={handleLogin}/>;
+  }
+
+  return(
+    <div>
+      {/* 헤더 */}
+      <header className="ph">
+        <div className="ph-left">
+          <span className="ph-school">양청고등학교</span>
+          <div className="ph-divider"/>
+          <span className="ph-title">수강신청(2022개정판)</span>
+        </div>
+        <div className="ph-right">
+          <div className="ph-user">
+            <div><strong>{profile.name}</strong> · {profile.grade ? `${profile.grade}학년` : '학년 확인 필요'} ({profile.studentId})</div>
+            <div style={{color:'#8a9bb0',fontSize:'11px'}}>신청기간: 2026-05-13 ~ 2026-05-24</div>
+          </div>
+        </div>
+      </header>
+
+      <div className="app-shell">
+        <ProfileSidebar
+          profile={profile}
+          onLogoutKeep={()=>handleLogout(false)}
+          onLogoutClear={()=>handleLogout(true)}
+        />
+        <main className="main-area">
+      <div className="wrap">
+        <div className="grade-lock-notice">
+          {profile.grade}학년 기준으로 선택 가능한 과목만 표시됩니다. 이전 학년 필수 이수 과목 {completedPreviousRequiredCredits}학점은 자동 완료 처리되었습니다.
+        </div>
+        {/* 공지 */}
+        <div className="notice-bar">
+          <span className="notice-icon">📢</span>
+          <div className="notice-body">
+            수강신청 기간: <strong>2026-05-13 15:20 ~ 2026-05-24 23:55</strong>
+            <span className="notice-tag">신청중</span><br/>
+            신청 가능 학기(학생): 2-1, 2-2, 3-1, 3-2 &nbsp;·&nbsp; 색상 셀을 클릭하면 과목을 선택할 수 있습니다.
+          </div>
+        </div>
+
+        {/* 요약 */}
+        <div className="dashboard-top">
+          <div className="summary-card">
+            <div>
+              <div className="summary-head">
+                <div>
+                  <div className="summary-label">총 이수학점</div>
+                  <div className="summary-total">{grand} / 174 학점</div>
+                </div>
+                <div className="summary-status" style={{color:'#2563eb',fontWeight:700}}>{pct}%</div>
+              </div>
+              <div className="summary-sub">지난 선택을 반영한 현재 이수학점입니다.</div>
+            </div>
+            <div className="summary-progress">
+              <div className="progress-text">
+                <span>진행률</span>
+                <strong>{pct}%</strong>
+              </div>
+              <div className="progress-bar"><div className="progress-track" style={{width:`${pct}%`}}/></div>
+              <div className="summary-alert" style={{background: adaptability === '적합' ? '#ECFDF5' : adaptability === '주의' ? '#FEF9E7' : '#FEF3F2', color: adaptability === '적합' ? '#166534' : adaptability === '주의' ? '#B45309' : '#B91C1C', borderColor: adaptability === '적합' ? '#D1FAE5' : adaptability === '주의' ? '#FCD34D' : '#FECACA'}}>
+                <span>{adaptability === '적합' ? '✓' : adaptability === '주의' ? '⚠' : '✕'}</span>
+                <span>{adaptability}</span>
+              </div>
+            </div>
+          </div>
+          <div className="mini-metrics">
+            <div className="metric-card">
+              <div className="metric-label">필수 학점</div>
+              <div className="metric-value">{reqTotal}학점</div>
+              <div className="metric-meta">학교지정 필수 과목 합계</div>
+            </div>
+            <div className="metric-card">
+              <div className="metric-label">선택 학점</div>
+              <div className="metric-value">{selTotal}학점</div>
+              <div className="metric-meta">학생 선택 과목 총합</div>
+            </div>
+            <div className="metric-card">
+              <div className="metric-label">총 과목 수</div>
+              <div className="metric-value">{totalCnt}개</div>
+              <div className="metric-meta">전체 이수 과목 수</div>
+            </div>
+            <div className="metric-card">
+              <div className="metric-label">선택 과목</div>
+              <div className="metric-value">{selDone}개</div>
+              <div className="metric-meta">선택한 슬롯 개수</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="option-panel">
+          <label className="option-checkbox">
+            <input type="checkbox" checked={jointEnabled} onChange={toggleJointEnabled}/>
+            공동교육과정 참여
+          </label>
+          <label className="option-checkbox">
+            <input type="checkbox" checked={onlineEnabled} onChange={toggleOnlineEnabled}/>
+            온라인학교 참여
+          </label>
+          <label className="option-checkbox">
+            <input type="checkbox" checked={showRequired} onChange={()=>setShowRequired(prev=>!prev)}/>
+            학교지정 과목 보기
+          </label>
+        </div>
+
+        <div className="status-panel">
+          <div className="status-group">
+            <div className="status-group-title">⚠ 부족한 항목</div>
+            <div className="status-list">
+              {insufficiencies.length ? insufficiencies.map(state=>{
+                const goal = state.kind === 'max' ? state.max : state.min;
+                const label = state.label;
+                const value = `${state.current} / ${goal}`;
+                const note = state.kind === 'minSem' 
+                  ? `${Math.abs(state.diff)}학기 부족` 
+                  : state.kind === 'max'
+                    ? `${Math.abs(state.diff)}학점 초과`
+                    : `${Math.abs(state.diff)}학점 부족`;
+                return (
+                  <div key={state.key} className={`status-item ${state.kind === 'max' ? 'danger' : state.kind === 'minSem' ? 'warning' : 'danger'}`}>
+                    <span className="label">{label}</span>
+                    <span className="value">{value} {state.passed ? null : `· ${note}`}</span>
+                  </div>
+                );
+              }) : <div className="status-empty">모든 학점 항목이 현재 충족되었습니다.</div>}
+            </div>
+          </div>
+          <div className="status-group">
+            <div className="status-group-title">✓ 충족한 항목</div>
+            {satisfactions.length ? (
+              <div className="status-tags">
+                {satisfactions.map(state=>(
+                  <span key={state.key} className="status-tag">{state.label}</span>
+                ))}
+              </div>
+            ) : <div className="status-empty">충족한 항목이 없습니다.</div>}
+          </div>
+        </div>
+
+        {(jointEnabled || onlineEnabled) && (
+          <div className="status-group">
+            <div className="status-group-title">📊 공동교육과정·온라인학교 초과학점 분석</div>
+            <div className="status-list">
+              <div className="status-item">
+                <span className="label">총 초과학점</span>
+                <span className="value">{formatCredit(kmeAnalysis.excessCredits)}학점</span>
+              </div>
+              <div className="status-item">
+                <span className="label">국영수 초과학점</span>
+                <span className="value">{formatCredit(kmeAnalysis.externalKMECredits)}학점</span>
+              </div>
+              <div className="status-item">
+                <span className="label">비국영수 초과학점</span>
+                <span className="value">{formatCredit(kmeAnalysis.nonKMECredits)}학점</span>
+              </div>
+              <div className="status-item">
+                <span className="label">허용 가능한 국영수 최대 학점</span>
+                <span className="value">{formatCredit(kmeAnalysis.allowedExternalKME)}학점</span>
+              </div>
+              <div className="status-item">
+                <span className="label">실제 국영수 초과학점</span>
+                <span className="value">{formatCredit(kmeAnalysis.externalKMECredits)}학점</span>
+              </div>
+              <div className="status-item">
+                <span className="label">국영수 비율</span>
+                <span className="value">{kmeAnalysis.ratioPercent}</span>
+              </div>
+              <div className={`status-item ${kmeAnalysis.status}`}>
+                <span className="label">최종 판정</span>
+                <span className="value">{kmeAnalysis.judgement}</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="warning-panel">
+          <div className="warning-title">선이수과목 점검</div>
+          {prereqWarnings.length > 0 ? (
+            <ul className="warning-list">
+              {prereqWarnings.map(w=>(
+                <li key={w.name}>
+                  <strong>{w.name}</strong> ❌ 필수 선이수과목: {w.missing.join(', ')}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="warning-empty">선이수과목 미준수 항목이 없습니다.</div>
+          )}
+        </div>
+
+        {/* 테이블 */}
+        <div className="table-card">
+          <div className="tc">
+            <div className="tc-hd">
+              <span className="tc-t">📋 교육과정 편성표</span>
+              <span className="tc-s">색상 셀 클릭 → 과목 선택 &nbsp;|&nbsp; (괄호) = 교차이수</span>
+            </div>
+            <div className="tw">
+              <table className="table-body">
+              <thead>
+                <tr>
+                  <th rowSpan={2}>교과(군)</th>
+                  <th rowSpan={2}>과목구분</th>
+                  <th rowSpan={2}>과목</th>
+                  <th rowSpan={2}>기본<br/>학점</th>
+                  <th rowSpan={2}>운영<br/>학점</th>
+                  <th colSpan={2} style={{background:'#b8d8f0'}}>1학년</th>
+                  <th colSpan={2} style={{background:'#b8d8f0'}}>2학년</th>
+                  <th colSpan={2} style={{background:'#b8d8f0'}}>3학년</th>
+                  <th rowSpan={2}>이수<br/>학점</th>
+                  <th rowSpan={2}>필수이수<br/>학점</th>
+                </tr>
+                <tr>
+                  {SEMESTERS.map(s=><th key={s.key} style={{background:'#cce3f5'}}>{s.sm}학기</th>)}
+                </tr>
+              </thead>
+              <tbody>
+                {/* 학교지정 필수 — 섹션 헤더 */}
+                {showRequired ? (
+                  <>
+                    <tr>
+                      <td colSpan={13} style={{background:'#d4eaf7',padding:'5px 12px',fontSize:'10.5px',fontWeight:700,color:'#1a4f7a',letterSpacing:'.06em',borderTop:'2px solid #aac8e0'}}>
+                        ▸ 학교지정 — 모든 학생 공통 이수 (고정)
+                      </td>
+                    </tr>
+                    {catGroups.map(({cat,subjects})=>
+                      subjects.map((subj,si)=>(
+                        <ReqRow key={subj.id} subj={subj} showCat={si===0} catRowspan={subjects.length}/>
+                      ))
+                    )}
+                  </> 
+                ) : (
+                  <tr>
+                    <td colSpan={13} style={{background:'#f2f7ff',padding:'12px 14px',fontSize:'11px',color:'#355b8c',borderTop:'2px solid #aac8e0'}}>
+                      학교지정 과목은 ‘학교지정 과목 보기’ 옵션을 켜야 표시됩니다.
+                    </td>
+                  </tr>
+                )}
+
+                {/* 학생선택 — 섹션 헤더 */}
+                <tr>
+                  <td colSpan={13} style={{background:'#e8f0fb',padding:'5px 12px',fontSize:'10.5px',fontWeight:700,color:'#3a5a8a',letterSpacing:'.06em',borderTop:'2px solid #aac8e0'}}>
+                    ▸ 학생선택 — 색상 셀 클릭하여 과목 선택
+                  </td>
+                </tr>
+
+                {/* 학생선택 슬롯 */}
+                {activeSlots.length ? activeSlots.map(slot=>(
+                  <SlotRow key={slot.id} slot={slot} selections={selections} onCellClick={setPanelSlot}/>
+                )) : (
+                  <tr>
+                    <td colSpan={13} style={{background:'#f8fafc',padding:'18px 14px',fontSize:'12px',color:'#6b7280'}}>
+                      현재 학년에서 선택할 수 있는 학생 선택 과목이 없습니다.
+                    </td>
+                  </tr>
+                )}
+
+                {/* 합계 */}
+                <tr className="sum-row">
+                  <td colSpan={3} style={{textAlign:'right',fontFamily:"'Noto Sans KR',sans-serif",fontWeight:700,fontSize:'11px'}}>합계</td>
+                  <td></td><td></td>
+                  {semStats.map(s=><td key={s.key}>{s.cr}</td>)}
+                  <td>{grand}</td>
+                  <td></td>
+                </tr>
+                <tr className="sum-row">
+                  <td colSpan={3} style={{textAlign:'right',fontFamily:"'Noto Sans KR',sans-serif",fontWeight:700,fontSize:'11px'}}>과목 수</td>
+                  <td></td><td></td>
+                  {semStats.map(s=><td key={s.key}>{s.cnt}</td>)}
+                  <td>{totalCnt}</td>
+                  <td></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        </div>
+      </div>
+      </main>
+      </div>
+
+      {/* 패널 */}
+      {panelSlot&&(
+        <Panel
+          slot={panelSlot}
+          currentIds={selections[panelSlot.id]||[]}
+          selections={selections}
+          onSelect={handleSelect}
+          onClose={()=>setPanelSlot(null)}
+          showToast={showToast}
+        />
+      )}
+
+      {toast&&<Toast msg={toast}/>}
+    </div>
+  );
+}
+
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
