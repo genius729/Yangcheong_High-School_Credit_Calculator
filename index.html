@@ -243,6 +243,10 @@ tr.sum-row td:first-child{font-family:'Noto Sans KR',sans-serif;text-align:right
 .login-desc{font-size:13px;line-height:1.7;color:#6b7280;margin-bottom:22px}
 .google-login-btn{height:46px;width:100%;border:1px solid #d0d7e2;border-radius:8px;background:#fff;color:#111827;font-size:14px;font-weight:700;font-family:'Noto Sans KR',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:box-shadow .15s,transform .15s}
 .google-login-btn:hover{box-shadow:0 8px 18px rgba(26,115,232,.14);transform:translateY(-1px)}
+.login-divider{display:flex;align-items:center;gap:10px;margin:14px 0;color:#9ca3af;font-size:11px;font-weight:700}
+.login-divider::before,.login-divider::after{content:"";height:1px;background:#e5e7eb;flex:1}
+.dev-login-btn{height:42px;width:100%;border:1px solid #bfdbfe;border-radius:8px;background:#eff6ff;color:#1d4ed8;font-size:13px;font-weight:800;font-family:'Noto Sans KR',sans-serif;cursor:pointer;transition:box-shadow .15s,transform .15s}
+.dev-login-btn:hover{box-shadow:0 8px 18px rgba(37,99,235,.14);transform:translateY(-1px)}
 .login-error{margin-top:14px;color:#b91c1c;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px 12px;font-size:12.5px;line-height:1.5}
 .app-shell{display:grid;grid-template-columns:280px minmax(0,1fr);gap:16px;max-width:1480px;margin:0 auto;padding:14px 12px 60px}
 .profile-sidebar{position:sticky;top:66px;align-self:start;background:#fff;border:1px solid #d7e4f4;border-radius:16px;padding:18px;box-shadow:0 10px 24px rgba(15,23,42,.06)}
@@ -250,26 +254,95 @@ tr.sum-row td:first-child{font-family:'Noto Sans KR',sans-serif;text-align:right
 .profile-photo{width:64px;height:64px;border-radius:50%;object-fit:cover;background:#e8f0fe;border:3px solid #fff;box-shadow:0 4px 12px rgba(15,23,42,.16);margin-bottom:12px}
 .profile-fallback{width:64px;height:64px;border-radius:50%;background:#1a73e8;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;margin-bottom:12px}
 .profile-name{font-size:17px;font-weight:800;color:#111827;margin-bottom:4px}
+.profile-name-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.admin-badge{display:inline-flex;align-items:center;padding:3px 8px;border-radius:999px;background:#e0e7ff;color:#3730a3;font-size:10px;font-weight:800}
 .profile-email{display:block;color:#2563eb;font-size:12.5px;text-decoration:none;margin-bottom:12px;word-break:break-all}
 .profile-meta{display:flex;flex-direction:column;gap:8px;margin:14px 0}
 .profile-meta-row{display:flex;justify-content:space-between;gap:10px;border-top:1px solid #eef2f7;padding-top:8px;font-size:12.5px;color:#4b5563}
 .profile-meta-row strong{color:#111827}
-.logout-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+.admin-profile-note{margin:14px 0;padding:11px 12px;border:1px solid #c7d2fe;border-radius:10px;background:#eef2ff;color:#3730a3;font-size:11.5px;line-height:1.6}
+.admin-page-btn{width:100%;height:38px;border:1px solid #4338ca;border-radius:8px;background:#4f46e5;color:#fff;font-size:12px;font-weight:800;font-family:'Noto Sans KR',sans-serif;cursor:pointer;transition:transform .15s,box-shadow .15s}
+.admin-page-btn:hover{transform:translateY(-1px);box-shadow:0 7px 16px rgba(79,70,229,.22)}
+.logout-row{margin-top:16px}
 .logout-btn{height:36px;border-radius:8px;border:1px solid #d0d7e2;background:#fff;color:#374151;font-size:12px;font-weight:700;font-family:'Noto Sans KR',sans-serif;cursor:pointer}
 .logout-btn.danger{border-color:#fecaca;color:#b91c1c;background:#fff7f7}
-.grade-lock-notice{background:#ecfdf5;border:1px solid #bbf7d0;color:#166534;border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:13px;font-weight:700}
+.logout-row>.logout-btn{width:100%}
+.data-delete-area{margin-top:14px;padding-top:14px;border-top:1px solid #eef2f7}
+.data-delete-label{margin-bottom:8px;font-size:11px;color:#8a9bb0}
+.data-delete-area .logout-btn{width:100%}
 .main-area{min-width:0}
 
 @media (max-width:980px){
   .app-shell{grid-template-columns:1fr}
   .profile-sidebar{position:static}
   .profile-card{display:grid;grid-template-columns:auto 1fr;gap:0 14px}
-  .profile-meta,.logout-row{grid-column:1 / -1}
+  .profile-meta,.admin-profile-note,.admin-page-btn,.logout-row{grid-column:1 / -1}
 }
 @media (max-width:560px){
   .login-panel{padding:24px 18px}
   .profile-card{display:block}
-  .logout-row{grid-template-columns:1fr}
+}
+
+@media (max-width:760px){
+  html{font-size:14px}
+  body{overflow-x:hidden}
+  .ph{height:auto;min-height:54px;padding:9px 12px;gap:8px}
+  .ph-left{min-width:0;gap:8px}
+  .ph-school{font-size:14px;white-space:nowrap}
+  .ph-title{font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ph-user{display:none}
+  .app-shell{padding:10px 8px 40px;gap:10px}
+  .profile-sidebar{top:64px;padding:14px}
+  .profile-photo,.profile-fallback{width:52px;height:52px;margin-bottom:8px}
+  .wrap{padding:0 0 40px}
+  .notice-bar{padding:12px 14px;border-radius:12px;font-size:12px}
+  .dashboard-top{gap:10px;margin-bottom:10px}
+  .summary-card{min-height:0;padding:18px;border-radius:12px}
+  .summary-total{font-size:30px}
+  .summary-progress{margin-top:18px}
+  .summary-alert{width:100%;padding:10px 12px;border-radius:10px}
+  .mini-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .metric-card{min-height:116px;padding:14px;border-radius:12px}
+  .metric-value{font-size:21px}
+  .metric-meta{font-size:11px}
+  .status-panel{gap:10px;margin-bottom:10px}
+  .status-group,.warning-panel{padding:15px;border-radius:12px}
+  .status-tag{padding:8px 10px;font-size:12px}
+  .option-panel{gap:12px;padding:14px;border-radius:12px}
+  .option-checkbox{width:100%;min-height:32px}
+  .option-checkbox input{width:20px;height:20px}
+  .table-card{border-radius:12px}
+  .tc-hd{padding:14px}
+  .tw{position:relative;overscroll-behavior-x:contain}
+  .tw::before{content:"← 표를 좌우로 밀어 확인하세요 →";display:block;position:sticky;left:0;padding:8px 12px;background:#eff6ff;color:#2563eb;font-size:11px;font-weight:700;text-align:center;border-bottom:1px solid #dbeafe}
+  .table-body{min-width:720px}
+  .table-body .mobile-optional,.table-body td.cat-cell,.table-body td.sub-cell{display:none}
+  thead th{padding:8px 7px}
+  tbody td{padding:8px 7px}
+  td.name-cell{position:sticky;left:0;z-index:1;min-width:132px;max-width:150px;background:#fff;box-shadow:3px 0 6px rgba(15,23,42,.08);white-space:normal}
+  td.slot.name-cell{background:#f8fafc}
+  .slot-inner{min-height:36px}
+  .overlay{align-items:flex-end}
+  .sp{width:100%;max-height:92dvh;border-radius:18px 18px 0 0;animation:sheetIn .22s cubic-bezier(.4,0,.2,1)}
+  .sp-hd{padding:16px}
+  .sp-body{padding:12px 14px}
+  .co{min-height:52px}
+  .sp-ft{padding:12px 14px max(12px,env(safe-area-inset-bottom))}
+  .btn-ok{height:46px}
+  .toast{bottom:max(14px,env(safe-area-inset-bottom));max-width:calc(100vw - 24px);white-space:normal;text-align:center}
+}
+
+@keyframes sheetIn{from{transform:translateY(28px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+@media (max-width:420px){
+  .ph-divider{display:none}
+  .ph-left{display:block}
+  .ph-title{display:block;margin-top:2px}
+  .mini-metrics{grid-template-columns:1fr 1fr}
+  .metric-card{min-height:108px}
+  .status-item{align-items:flex-start;gap:6px;flex-direction:column}
+  .status-item .value{text-align:left}
+  .login-screen{padding:14px}
 }
 
 ::-webkit-scrollbar{width:4px;height:4px}
@@ -286,14 +359,15 @@ try {
     throw new Error('index.html을 직접 열지 말고 http://localhost:5173 같은 로컬 서버 주소로 접속해 주세요.');
   }
 
-  const [loginModule, storageModule, profileModule, firestoreModule] = await Promise.all([
+  const [loginModule, storageModule, profileModule, firestoreModule, adminModule] = await Promise.all([
     import('./src/login.js'),
     import('./src/storage.js'),
     import('./src/profile.js'),
     import('./firebase/firestore.js'),
+    import('./admin/firebase.js'),
   ]);
 
-  window.YCCUModules = { loginModule, storageModule, profileModule, firestoreModule };
+  window.YCCUModules = { loginModule, storageModule, profileModule, firestoreModule, adminModule };
   window.dispatchEvent(new Event('yccu-modules-ready'));
 } catch (error) {
   window.YCCUModuleError = error;
@@ -554,6 +628,134 @@ const ALL_SLOTS = [...SLOTS, ...JOINT_SLOTS, ...ONLINE_SLOTS];
 const SLOT_MAP = Object.fromEntries(ALL_SLOTS.map(s=>[s.id,s]));
 ALL_SLOTS.forEach(s=>{ s.max = SLOT_MAX_SELECTIONS[s.id] ?? 1; });
 
+function semKeyFromSubjectDoc(subject){
+  if(subject.originalSemester) return subject.originalSemester;
+  const grade = Number(subject.grade || 1);
+  const semester = String(subject.semester || '1').split(',')[0];
+  return `y${grade}s${semester}`;
+}
+
+function subjectCategoryToSub(category){
+  if(category === '공통과목') return '공통';
+  if(category === '일반선택') return '일반';
+  if(category === '진로선택') return '진로';
+  if(category === '융합선택') return '융합';
+  return category || '일반';
+}
+
+function toCalculatorSubject(subject){
+  return {
+    id: subject.sourceId || subject.id,
+    name: subject.subjectName || subject.name || '',
+    sub: subjectCategoryToSub(subject.category),
+    cr: Number(subject.credits ?? subject.cr ?? 0),
+    group: subject.subjectGroup || subject.cat || '',
+  };
+}
+
+function ensureExternalSlot(subject){
+  const isOnline = subject.category === '온라인학교' || subject.source === 'calculator-online';
+  const isJoint = subject.category === '공동교육과정' || subject.source === 'calculator-joint';
+  if(!isOnline && !isJoint) return null;
+
+  const semKey = semKeyFromSubjectDoc(subject);
+  const slots = isOnline ? ONLINE_SLOTS : JOINT_SLOTS;
+  const div = isOnline ? '온라인학교' : '공동교육과정';
+  const knownSlot = subject.slotId
+    ? (SLOT_MAP[subject.slotId]?.div === div ? SLOT_MAP[subject.slotId] : null)
+    : slots.find(slot=>slot.semKey===semKey);
+  if(knownSlot) return knownSlot;
+
+  const slotId = subject.slotId || `${isOnline ? 'Online' : 'Joint'}-${semKey}`;
+  const semesterLabel = SEMESTERS.find(semester=>semester.key===semKey)?.label || semKey;
+  const slot = {
+    id: slotId,
+    semKey,
+    color: isOnline ? '#e8d9f7' : '#d9eaf7',
+    div,
+    cat: div,
+    label: subject.slotLabel || `${div} 선택 (${semesterLabel})`,
+    subjects: [],
+    max: 2,
+    catalogGenerated: true,
+  };
+
+  slots.push(slot);
+  ALL_SLOTS.push(slot);
+  SLOT_MAP[slotId] = slot;
+  SLOT_MAX_SELECTIONS[slotId] = 2;
+  return slot;
+}
+
+function resetCatalogSlots(){
+  [JOINT_SLOTS, ONLINE_SLOTS].forEach(slots=>{
+    for(let index=slots.length-1; index>=0; index-=1){
+      if(!slots[index].catalogGenerated) continue;
+      const [removed] = slots.splice(index,1);
+      delete SLOT_MAP[removed.id];
+      delete SLOT_MAX_SELECTIONS[removed.id];
+    }
+  });
+
+  for(let index=ALL_SLOTS.length-1; index>=0; index-=1){
+    if(ALL_SLOTS[index].catalogGenerated) ALL_SLOTS.splice(index,1);
+  }
+
+  ALL_SLOTS.forEach(slot=>{
+    slot.subjects = [];
+  });
+}
+
+function applySubjectCatalog(subjectRows = []){
+  const activeRows = subjectRows.filter(subject=>subject.active !== false);
+  resetCatalogSlots();
+
+  const requiredRows = activeRows.filter(subject=>subject.required);
+  REQUIRED_SUBJECTS.splice(0, REQUIRED_SUBJECTS.length, ...requiredRows.map(subject=>({
+    id: subject.sourceId || subject.id,
+    div: '학교지정',
+    cat: subject.subjectGroup || subject.cat || '',
+    sub: subjectCategoryToSub(subject.category),
+    name: subject.subjectName || subject.name || '',
+    cr: Number(subject.credits ?? subject.cr ?? 0),
+    sem: semKeyFromSubjectDoc(subject),
+    crossSem: subject.crossSemester || subject.crossSem || undefined,
+  })));
+
+  const slotRows = activeRows
+    .filter(subject=>!subject.required)
+    .map(subject=>{
+      const externalSlot = ensureExternalSlot(subject);
+      if(externalSlot) return {...subject,slotId:externalSlot.id};
+      return subject.slotId && SLOT_MAP[subject.slotId] ? subject : {...subject,slotId:''};
+    })
+    .filter(subject=>subject.slotId && SLOT_MAP[subject.slotId]);
+  const bySlot = slotRows.reduce((map, subject)=>{
+    if(!map[subject.slotId]) map[subject.slotId] = [];
+    map[subject.slotId].push(toCalculatorSubject(subject));
+    return map;
+  }, {});
+
+  ALL_SLOTS.forEach(slot=>{
+    slot.subjects = bySlot[slot.id] || [];
+  });
+
+  ALL_SLOTS.forEach(s=>{ s.max = SLOT_MAX_SELECTIONS[s.id] ?? 1; });
+  return true;
+}
+
+function pruneCatalogSelections(selections){
+  return Object.fromEntries(
+    Object.entries(selections).flatMap(([slotId,ids])=>{
+      const slot = SLOT_MAP[slotId];
+      if(!slot || !Array.isArray(ids)) return [];
+      const availableIds = new Set(slot.subjects.map(subject=>subject.id));
+      const validIds = ids.filter(id=>availableIds.has(id));
+      return validIds.length ? [[slotId,validIds]] : [];
+    })
+  );
+}
+
 function normalizeGroup(subject){
   if(subject.group) return subject.group;
 
@@ -747,32 +949,48 @@ function groupByCat(){
   return order.map(cat=>({cat,subjects:map[cat]}));
 }
 
-// 선택 슬롯의 학년을 semKey에서 읽어 학년별 표시 제한에 사용합니다.
-function getSlotGrade(slot){
-  const sem = SEMESTERS.find(item=>item.key===slot.semKey);
-  return sem?.yr || 0;
-}
-
-// 학년별로 현재 선택 가능한 학생 선택 슬롯만 남깁니다.
-function filterSlotsByGrade(slots, grade){
-  if(!grade) return slots;
-  return slots.filter(slot=>getSlotGrade(slot)===grade);
-}
-
-// 이미 이수한 이전 학년 필수 과목의 학점 합계를 자동 완료 처리합니다.
-function reqCompletedCrByGrade(grade){
-  if(!grade || grade <= 1) return 0;
-  return REQUIRED_SUBJECTS
-    .filter(subj=>{
-      const sem = SEMESTERS.find(item=>item.key===subj.sem);
-      return sem && sem.yr < grade;
-    })
-    .reduce((sum,subj)=>sum+subj.cr,0);
-}
-
 // 저장소에 넣을 계산 결과를 한 객체로 정리합니다.
 function buildCalculationResult({grand, reqTotal, selTotal, totalCnt, selDone, pct, adaptability, grade}){
   return {grand, reqTotal, selTotal, totalCnt, selDone, pct, adaptability, grade};
+}
+
+function getStateOwnerId(profile, authUser){
+  return authUser?.uid || profile?.uid || profile?.email || profile?.studentId || 'local-user';
+}
+
+function sanitizeSelections(value){
+  if(!value || typeof value !== 'object' || Array.isArray(value)) return {};
+  return Object.fromEntries(
+    Object.entries(value)
+      .filter(([slotId, ids])=>typeof slotId === 'string' && slotId.length <= 100 && Array.isArray(ids))
+      .slice(0,100)
+      .map(([slotId, ids])=>[
+        slotId,
+        ids.filter(id=>typeof id === 'string' && id.length <= 100).slice(0,20),
+      ])
+  );
+}
+
+// 개발 중에만 테스트 로그인을 노출하기 위한 로컬 실행 여부 검사입니다.
+function isLocalDevHost(){
+  return ['localhost','127.0.0.1','::1'].includes(window.location.hostname);
+}
+
+// 학교 계정 승인 전 UI와 계산 흐름을 확인하기 위한 가짜 학생 프로필입니다.
+function buildDevProfile(){
+  const email = '2630917@yc.hs.kr';
+  const studentId = email.split('@')[0];
+  const grade = Number(studentId.charAt(2));
+
+  return {
+    uid: 'local-dev-user',
+    name: '테스트 학생',
+    email,
+    photoURL: '',
+    studentId,
+    grade: grade >= 1 && grade <= 3 ? grade : 1,
+    isDevUser: true,
+  };
 }
 
 // 네이티브 module script가 Firebase 관련 모듈을 준비할 때까지 기다립니다.
@@ -941,17 +1159,23 @@ function SlotRow({slot,selections,onCellClick}){
 }
 
 // 로그인 전 중앙 화면입니다.
-function LoginScreen({error,onLogin}){
+function LoginScreen({error,onLogin,onDevLogin,showDevLogin}){
   return(
     <main className="login-screen">
       <section className="login-panel">
         <div className="login-logo">YC</div>
         <h1 className="login-title">양청고 이수학점 계산기</h1>
-        <p className="login-desc">학교 Google Workspace 계정으로 로그인하면 학번과 학년을 자동으로 판별해 선택 가능한 과목을 보여줍니다.</p>
+        <p className="login-desc">학교 Google Workspace 계정 또는 관리자가 등록한 Google 계정으로 로그인할 수 있습니다.</p>
         <button className="google-login-btn" onClick={onLogin}>
           <span>G</span>
           <span>Google 계정으로 로그인</span>
         </button>
+        {showDevLogin&&(
+          <>
+            <div className="login-divider">LOCAL TEST</div>
+            <button className="dev-login-btn" onClick={onDevLogin}>테스트 계정으로 입장</button>
+          </>
+        )}
         {error&&<div className="login-error">{error}</div>}
       </section>
     </main>
@@ -959,7 +1183,7 @@ function LoginScreen({error,onLogin}){
 }
 
 // 로그인 후 좌측에 표시되는 학생 프로필 카드입니다.
-function ProfileSidebar({profile,onLogoutKeep,onLogoutClear}){
+function ProfileSidebar({profile,adminRecord,onAdminPage,onLogout,onDeleteData}){
   const view = window.YCCUProfile?.getProfileViewModel(profile) || {
     name: profile?.name || '',
     email: profile?.email || '',
@@ -968,6 +1192,8 @@ function ProfileSidebar({profile,onLogoutKeep,onLogoutClear}){
     photoURL: profile?.photoURL || '',
   };
   const initial = view.name ? view.name.slice(0,1) : 'Y';
+  const isAdmin = Boolean(adminRecord);
+  const adminLabel = adminRecord?.role === 'super-admin' ? '최고 관리자' : '관리자';
 
   return(
     <aside className="profile-sidebar">
@@ -976,16 +1202,29 @@ function ProfileSidebar({profile,onLogoutKeep,onLogoutClear}){
           ? <img className="profile-photo" src={view.photoURL} alt={`${view.name} 프로필 이미지`}/>
           : <div className="profile-fallback">{initial}</div>}
         <div>
-          <div className="profile-name">{view.name}</div>
+          <div className="profile-name-row">
+            <div className="profile-name">{view.name}</div>
+            {isAdmin&&<span className="admin-badge">{adminLabel}</span>}
+          </div>
           <a className="profile-email" href={`mailto:${view.email}`}>{view.email}</a>
         </div>
-        <div className="profile-meta">
-          <div className="profile-meta-row"><span>학번</span><strong>{view.studentId}</strong></div>
-          <div className="profile-meta-row"><span>현재 학년</span><strong>{view.gradeText}</strong></div>
-        </div>
+        {isAdmin ? (
+          <>
+            <div className="admin-profile-note">관리자 권한으로 로그인했습니다. 계산기를 이용하거나 관리자 시스템으로 이동할 수 있습니다.</div>
+            <button className="admin-page-btn" onClick={onAdminPage}>관리자 페이지로 이동</button>
+          </>
+        ) : (
+          <div className="profile-meta">
+            <div className="profile-meta-row"><span>학번</span><strong>{view.studentId}</strong></div>
+            <div className="profile-meta-row"><span>현재 학년</span><strong>{view.gradeText}</strong></div>
+          </div>
+        )}
         <div className="logout-row">
-          <button className="logout-btn" onClick={onLogoutKeep}>로그아웃 · 저장 유지</button>
-          <button className="logout-btn danger" onClick={onLogoutClear}>로그아웃 · 삭제</button>
+          <button className="logout-btn" onClick={onLogout}>로그아웃</button>
+          <div className="data-delete-area">
+            <div className="data-delete-label">저장된 과목 선택만 초기화합니다.</div>
+            <button className="logout-btn danger" onClick={onDeleteData}>저장 데이터 삭제</button>
+          </div>
         </div>
       </div>
     </aside>
@@ -1006,7 +1245,10 @@ function App(){
   const [loginApi,setLoginApi]=useState(null);
   const [storageApi,setStorageApi]=useState(null);
   const [firestoreApi,setFirestoreApi]=useState(null);
+  const [adminApi,setAdminApi]=useState(null);
   const [hydrated,setHydrated]=useState(false);
+  const [subjectVersion,setSubjectVersion]=useState(0);
+  const [adminRecord,setAdminRecord]=useState(null);
 
   const showToast=useCallback(msg=>{
     setToast(msg);setTimeout(()=>setToast(null),2200);
@@ -1017,19 +1259,23 @@ function App(){
     let alive = true;
 
     // Firebase/저장소 모듈은 네이티브 module script에서 로드한 값을 사용합니다.
-    waitForYccuModules().then(({loginModule, storageModule, profileModule, firestoreModule})=>{
+    waitForYccuModules().then(({loginModule, storageModule, profileModule, firestoreModule, adminModule})=>{
       if(!alive) return;
 
       window.YCCUProfile = profileModule;
       setLoginApi(loginModule);
       setStorageApi(storageModule);
       setFirestoreApi(firestoreModule);
+      setAdminApi(adminModule);
       unsubscribe = loginModule.initLoginController(({status,profile,user,error})=>{
         setAuthReady(true);
         setAuthError(error);
         setProfile(profile);
         setAuthUser(user || null);
-        if(status === 'signed-out') setHydrated(false);
+        if(status === 'signed-out'){
+          adminModule.clearRememberedAdmin?.();
+          setHydrated(false);
+        }
       });
     }).catch(error=>{
       setAuthReady(true);
@@ -1047,31 +1293,89 @@ function App(){
   useEffect(()=>{
     if(!profile || !storageApi || hydrated) return;
 
-    // 로그인 후 LocalStorage에 저장된 선택 상태를 먼저 복원합니다.
-    const saved = storageApi.loadAppState();
-    if(saved){
-      setSelections(saved.selections || {});
-      setJointEnabled(Boolean(saved.jointEnabled));
-      setOnlineEnabled(Boolean(saved.onlineEnabled));
-      setShowRequired(Boolean(saved.showRequired));
+    let active = true;
+    const ownerId = getStateOwnerId(profile, authUser);
+
+    async function restoreSavedState(){
+      // 이 브라우저의 사용자별 저장값을 우선 사용하고, 없을 때만 Firestore로 보완합니다.
+      let saved = storageApi.loadAppState(ownerId);
+      if(!saved && firestoreApi && authUser){
+        try{
+          saved = await firestoreApi.loadUserCalculatorState(authUser);
+        }catch(error){
+          console.warn('Firestore 저장 데이터 복원 실패', error);
+        }
+      }
+
+      if(!active) return;
+      if(saved){
+        setSelections(sanitizeSelections(saved.selections));
+        setJointEnabled(Boolean(saved.jointEnabled));
+        setOnlineEnabled(Boolean(saved.onlineEnabled));
+        setShowRequired(Boolean(saved.showRequired));
+      }
+      setHydrated(true);
     }
 
-    setHydrated(true);
-  },[profile,storageApi,hydrated]);
+    restoreSavedState();
+    return ()=>{ active = false; };
+  },[profile,authUser,storageApi,firestoreApi,hydrated]);
+
+  useEffect(()=>{
+    let active = true;
+    const rememberedAdmin = adminApi?.getRememberedAdmin?.(authUser) || null;
+    setAdminRecord(rememberedAdmin);
+
+    if(!authUser || !adminApi?.requireAdmin) return ()=>{ active = false; };
+
+    adminApi.requireAdmin(authUser)
+      .then(record=>{
+        if(active) setAdminRecord(record);
+      })
+      .catch(error=>{
+        console.warn('관리자 권한 확인 실패', error);
+        if(active && !rememberedAdmin) setAdminRecord(null);
+      });
+
+    return ()=>{ active = false; };
+  },[authUser,adminApi]);
+
+  useEffect(()=>{
+    if(!firestoreApi) return;
+
+    const applyRows=(subjectRows)=>{
+      applySubjectCatalog(subjectRows);
+      setSelections(current=>pruneCatalogSelections(current));
+      setSubjectVersion(version=>version+1);
+    };
+    const handleError=(error)=>console.warn('Firestore 과목 불러오기 실패', error);
+
+    if(firestoreApi.watchSubjectCatalog){
+      return firestoreApi.watchSubjectCatalog(applyRows,handleError);
+    }
+    if(firestoreApi.loadSubjectCatalog){
+      firestoreApi.loadSubjectCatalog().then(applyRows).catch(handleError);
+    }
+  },[firestoreApi]);
+
+  useEffect(()=>{
+    if(!hydrated || subjectVersion===0) return;
+    setSelections(current=>pruneCatalogSelections(current));
+  },[hydrated,subjectVersion]);
 
   const activeSlots=useMemo(()=>{
     const slots=[...SLOTS];
     if(jointEnabled) slots.push(...JOINT_SLOTS);
     if(onlineEnabled) slots.push(...ONLINE_SLOTS);
-    return filterSlotsByGrade(slots, profile?.grade);
-  },[jointEnabled,onlineEnabled,profile]);
+    return slots.filter(slot=>slot.subjects.length>0);
+  },[jointEnabled,onlineEnabled,subjectVersion]);
 
   const activeExternalSlots=useMemo(()=>{
     const slots=[];
     if(jointEnabled) slots.push(...JOINT_SLOTS);
     if(onlineEnabled) slots.push(...ONLINE_SLOTS);
-    return filterSlotsByGrade(slots, profile?.grade);
-  },[jointEnabled,onlineEnabled,profile]);
+    return slots.filter(slot=>slot.subjects.length>0);
+  },[jointEnabled,onlineEnabled,subjectVersion]);
 
   const selectedSubjects=useMemo(()=>collectSubjects(selections,activeSlots),[selections,activeSlots]);
 
@@ -1096,21 +1400,42 @@ function App(){
     }
   },[loginApi]);
 
-  const handleLogout=useCallback(async(clearLocalData)=>{
-    if(!loginApi) return;
+  const handleAdminPage=useCallback(()=>{
+    window.location.href = './admin/';
+  },[]);
+
+  const handleDevLogin=useCallback(()=>{
+    // Firebase 승인 전에도 계산기 화면과 저장 흐름을 확인할 수 있도록 로컬 프로필을 주입합니다.
+    setAuthError(null);
+    setAuthUser(null);
+    setProfile(buildDevProfile());
+    setHydrated(false);
+  },[]);
+
+  const handleLogout=useCallback(async()=>{
     try{
-      await loginApi.logout({clearLocalData});
-      setSelections({});
-      setJointEnabled(false);
-      setOnlineEnabled(false);
-      setShowRequired(false);
+      if(loginApi && authUser) await loginApi.logout({clearLocalData:false});
+      // 로그아웃은 인증만 종료하며 선택 데이터는 로컬/Firestore에 그대로 유지합니다.
+      setPanelSlot(null);
       setProfile(null);
       setAuthUser(null);
       setHydrated(false);
     }catch(error){
       showToast('로그아웃 중 오류가 발생했습니다. 다시 시도해 주세요.');
     }
-  },[loginApi,showToast]);
+  },[loginApi,authUser,showToast]);
+
+  const handleDeleteData=useCallback(()=>{
+    if(!window.confirm('저장된 과목 선택 데이터를 삭제할까요?')) return;
+    const ownerId = getStateOwnerId(profile, authUser);
+    if(storageApi) storageApi.clearCalculatorData(ownerId);
+    setSelections({});
+    setJointEnabled(false);
+    setOnlineEnabled(false);
+    setShowRequired(false);
+    setPanelSlot(null);
+    showToast('저장 데이터를 삭제했습니다.');
+  },[storageApi,profile,authUser,showToast]);
 
   const toggleJointEnabled=useCallback(()=>{
     setJointEnabled(prev=>!prev);
@@ -1129,7 +1454,7 @@ function App(){
     }))
   ,[selections,activeSlots]);
 
-  const reqTotal=useMemo(()=>SEMESTERS.reduce((a,sem)=>a+reqCrBySem(sem.key),0),[]);
+  const reqTotal=useMemo(()=>SEMESTERS.reduce((a,sem)=>a+reqCrBySem(sem.key),0),[subjectVersion]);
   const selTotal=useMemo(()=>selectedSubjects.reduce((sum,{subj})=>sum+subj.cr,0),[selectedSubjects]);
   const grand=reqTotal+selTotal;
   const totalCnt=semStats.reduce((a,s)=>a+s.cnt,0);
@@ -1156,7 +1481,6 @@ function App(){
     ()=>getExternalCreditAnalysis(selections, activeExternalSlots, baseCreditsWithoutExternal),
     [selections, activeExternalSlots, baseCreditsWithoutExternal]
   );
-  const completedPreviousRequiredCredits = useMemo(()=>reqCompletedCrByGrade(profile?.grade),[profile]);
   const calculationResult = useMemo(()=>buildCalculationResult({
     grand, reqTotal, selTotal, totalCnt, selDone, pct, adaptability, grade:profile?.grade || null,
   }),[grand, reqTotal, selTotal, totalCnt, selDone, pct, adaptability, profile]);
@@ -1173,7 +1497,8 @@ function App(){
       showRequired,
       calculationResult,
     };
-    storageApi.saveAppState(payload);
+    const ownerId = getStateOwnerId(profile, authUser);
+    storageApi.saveAppState(payload, ownerId);
 
     // Firestore 저장 실패는 로컬 저장을 막지 않고 콘솔에만 기록합니다.
     if(firestoreApi && authUser){
@@ -1183,14 +1508,14 @@ function App(){
 
   const insufficiencies = categoryStates.filter(state=>!state.passed);
   const satisfactions = categoryStates.filter(state=>state.passed);
-  const catGroups=useMemo(()=>groupByCat(),[]);
+  const catGroups=useMemo(()=>groupByCat(),[subjectVersion]);
 
   if(!authReady){
-    return <LoginScreen error="로그인 상태를 확인하는 중입니다." onLogin={()=>{}}/>;
+    return <LoginScreen error="로그인 상태를 확인하는 중입니다." onLogin={()=>{}} onDevLogin={handleDevLogin} showDevLogin={isLocalDevHost()}/>;
   }
 
   if(!profile){
-    return <LoginScreen error={authError} onLogin={handleLogin}/>;
+    return <LoginScreen error={authError} onLogin={handleLogin} onDevLogin={handleDevLogin} showDevLogin={isLocalDevHost()}/>;
   }
 
   return(
@@ -1204,7 +1529,12 @@ function App(){
         </div>
         <div className="ph-right">
           <div className="ph-user">
-            <div><strong>{profile.name}</strong> · {profile.grade ? `${profile.grade}학년` : '학년 확인 필요'} ({profile.studentId})</div>
+            <div>
+              <strong>{profile.name}</strong>
+              {adminRecord
+                ? ` · ${adminRecord.role === 'super-admin' ? '최고 관리자' : '관리자'}`
+                : ` · ${profile.grade ? `${profile.grade}학년` : '학년 확인 필요'} (${profile.studentId})`}
+            </div>
             <div style={{color:'#8a9bb0',fontSize:'11px'}}>신청기간: 2026-05-13 ~ 2026-05-24</div>
           </div>
         </div>
@@ -1213,14 +1543,13 @@ function App(){
       <div className="app-shell">
         <ProfileSidebar
           profile={profile}
-          onLogoutKeep={()=>handleLogout(false)}
-          onLogoutClear={()=>handleLogout(true)}
+          adminRecord={adminRecord}
+          onAdminPage={handleAdminPage}
+          onLogout={handleLogout}
+          onDeleteData={handleDeleteData}
         />
         <main className="main-area">
       <div className="wrap">
-        <div className="grade-lock-notice">
-          {profile.grade}학년 기준으로 선택 가능한 과목만 표시됩니다. 이전 학년 필수 이수 과목 {completedPreviousRequiredCredits}학점은 자동 완료 처리되었습니다.
-        </div>
         {/* 공지 */}
         <div className="notice-bar">
           <span className="notice-icon">📢</span>
@@ -1278,21 +1607,6 @@ function App(){
               <div className="metric-meta">선택한 슬롯 개수</div>
             </div>
           </div>
-        </div>
-
-        <div className="option-panel">
-          <label className="option-checkbox">
-            <input type="checkbox" checked={jointEnabled} onChange={toggleJointEnabled}/>
-            공동교육과정 참여
-          </label>
-          <label className="option-checkbox">
-            <input type="checkbox" checked={onlineEnabled} onChange={toggleOnlineEnabled}/>
-            온라인학교 참여
-          </label>
-          <label className="option-checkbox">
-            <input type="checkbox" checked={showRequired} onChange={()=>setShowRequired(prev=>!prev)}/>
-            학교지정 과목 보기
-          </label>
         </div>
 
         <div className="status-panel">
@@ -1380,6 +1694,21 @@ function App(){
           )}
         </div>
 
+        <div className="option-panel">
+          <label className="option-checkbox">
+            <input type="checkbox" checked={jointEnabled} onChange={toggleJointEnabled}/>
+            공동교육과정 참여
+          </label>
+          <label className="option-checkbox">
+            <input type="checkbox" checked={onlineEnabled} onChange={toggleOnlineEnabled}/>
+            온라인학교 참여
+          </label>
+          <label className="option-checkbox">
+            <input type="checkbox" checked={showRequired} onChange={()=>setShowRequired(prev=>!prev)}/>
+            학교지정 과목 보기
+          </label>
+        </div>
+
         {/* 테이블 */}
         <div className="table-card">
           <div className="tc">
@@ -1387,12 +1716,12 @@ function App(){
               <span className="tc-t">📋 교육과정 편성표</span>
               <span className="tc-s">색상 셀 클릭 → 과목 선택 &nbsp;|&nbsp; (괄호) = 교차이수</span>
             </div>
-            <div className="tw">
+            <div className="tw" role="region" aria-label="교육과정 편성표" tabIndex="0">
               <table className="table-body">
               <thead>
                 <tr>
-                  <th rowSpan={2}>교과(군)</th>
-                  <th rowSpan={2}>과목구분</th>
+                  <th className="mobile-optional" rowSpan={2}>교과(군)</th>
+                  <th className="mobile-optional" rowSpan={2}>과목구분</th>
                   <th rowSpan={2}>과목</th>
                   <th rowSpan={2}>기본<br/>학점</th>
                   <th rowSpan={2}>운영<br/>학점</th>

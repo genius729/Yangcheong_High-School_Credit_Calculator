@@ -2,14 +2,234 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function hasVerifiedEmail() {
+      return signedIn()
+        && request.auth.token.email is string
+        && request.auth.token.email_verified == true;
+    }
+
+    function authEmail() {
+      return request.auth.token.email.lower();
+    }
+
     function isYangcheongAccount() {
-      return request.auth != null
-        && request.auth.token.email.matches('.*@yc\\.hs\\.kr$');
+      return hasVerifiedEmail()
+        && authEmail().matches('.*@yc\\.hs\\.kr$');
+    }
+
+    function adminPath() {
+      return /databases/$(database)/documents/admins/$(authEmail());
+    }
+
+    function allowedAccountPath() {
+      return /databases/$(database)/documents/allowedAccounts/$(authEmail());
+    }
+
+    function isAdmin() {
+      return hasVerifiedEmail()
+        && exists(adminPath())
+        && get(adminPath()).data.role in [
+          'admin',
+          'teacher',
+          '관리자',
+          'super-admin',
+          'super_admin',
+          'superadmin',
+          'Super Admin',
+          'SUPER_ADMIN',
+          '최고 관리자'
+        ];
+    }
+
+    function isAllowedAccount() {
+      return isYangcheongAccount()
+        || (hasVerifiedEmail() && exists(allowedAccountPath()))
+        || isAdmin();
+    }
+
+    function isSuperAdmin() {
+      return isAdmin() && get(adminPath()).data.role in [
+        'super-admin',
+        'super_admin',
+        'superadmin',
+        'Super Admin',
+        'SUPER_ADMIN',
+        '최고 관리자'
+      ];
+    }
+
+    function isOwner(userId) {
+      return isAllowedAccount() && request.auth.uid == userId;
+    }
+
+    function validOptionalString(data, field, maxLength) {
+      return !data.keys().hasAny([field])
+        || (data[field] is string && data[field].size() <= maxLength);
+    }
+
+    function validOptionalNumber(data, field, minValue, maxValue) {
+      return !data.keys().hasAny([field])
+        || (data[field] is number
+          && data[field] >= minValue
+          && data[field] <= maxValue);
+    }
+
+    function validOptionalBool(data, field) {
+      return !data.keys().hasAny([field]) || data[field] is bool;
+    }
+
+    function validUserData(data, userId) {
+      return data.uid == userId
+        && data.email is string
+        && data.email.lower() == authEmail()
+        && validOptionalString(data, 'name', 200)
+        && validOptionalString(data, 'studentId', 100)
+        && validOptionalString(data, 'photoURL', 2048)
+        && (!data.keys().hasAny(['grade'])
+          || data.grade == null
+          || (data.grade is int && data.grade >= 1 && data.grade <= 3))
+        && validOptionalNumber(data, 'credits', 0, 500)
+        && validOptionalBool(data, 'graduationEligible')
+        && validOptionalBool(data, 'jointCourseParticipating')
+        && validOptionalBool(data, 'onlineSchoolParticipating')
+        && (!data.keys().hasAny(['lastLoginAt']) || data.lastLoginAt is timestamp)
+        && (!data.keys().hasAny(['updatedAt']) || data.updatedAt is timestamp);
+    }
+
+    function userWritableFields() {
+      return [
+        'uid',
+        'name',
+        'email',
+        'studentId',
+        'photoURL',
+        'grade',
+        'credits',
+        'graduationEligible',
+        'jointCourseParticipating',
+        'onlineSchoolParticipating',
+        'lastLoginAt',
+        'updatedAt'
+      ];
+    }
+
+    function validCalculatorState(data) {
+      return data.keys().hasOnly([
+          'email',
+          'displayName',
+          'loginInfo',
+          'selections',
+          'jointEnabled',
+          'onlineEnabled',
+          'showRequired',
+          'calculationResult',
+          'updatedAt'
+        ])
+        && data.email is string
+        && data.email.lower() == authEmail()
+        && data.displayName is string
+        && data.displayName.size() <= 200
+        && data.loginInfo is map
+        && data.loginInfo.size() <= 10
+        && data.selections is map
+        && data.selections.size() <= 100
+        && data.jointEnabled is bool
+        && data.onlineEnabled is bool
+        && data.showRequired is bool
+        && data.calculationResult is map
+        && data.calculationResult.size() <= 20
+        && data.updatedAt is timestamp;
+    }
+
+    match /users/{userId} {
+      allow read, delete: if isOwner(userId) || isAdmin();
+      allow create: if isAdmin()
+        || (isOwner(userId)
+          && request.resource.data.keys().hasOnly(userWritableFields())
+          && validUserData(request.resource.data, userId));
+      allow update: if isAdmin()
+        || (isOwner(userId)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(userWritableFields())
+          && validUserData(request.resource.data, userId));
     }
 
     match /studentCalculatorStates/{userId} {
-      allow read, write: if isYangcheongAccount()
-        && request.auth.uid == userId;
+      allow read, delete: if isOwner(userId) || isAdmin();
+      allow create, update: if isAdmin()
+        || (isOwner(userId) && validCalculatorState(request.resource.data));
+    }
+
+    match /subjects/{subjectId} {
+      allow read: if isAllowedAccount();
+      allow write: if isAdmin();
+    }
+
+    match /announcements/{announcementId} {
+      allow read: if isAllowedAccount();
+      allow write: if isAdmin();
+    }
+
+    match /statistics/{statisticId} {
+      allow read: if isAllowedAccount();
+      allow write: if isAdmin();
+    }
+
+    match /logs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly([
+          'adminEmail',
+          'action',
+          'target',
+          'ipAddress',
+          'createdAt'
+        ])
+        && request.resource.data.adminEmail == authEmail()
+        && request.resource.data.adminEmail.size() <= 254
+        && request.resource.data.action is string
+        && request.resource.data.action.size() <= 200
+        && request.resource.data.target is string
+        && request.resource.data.target.size() <= 500
+        && request.resource.data.ipAddress is string
+        && request.resource.data.ipAddress.size() <= 64
+        && request.resource.data.createdAt is timestamp;
+      allow update, delete: if isSuperAdmin();
+    }
+
+    match /admins/{adminEmail} {
+      allow read: if isSuperAdmin()
+        || (hasVerifiedEmail() && authEmail() == adminEmail);
+      allow create, update: if isSuperAdmin()
+        && request.resource.data.keys().hasOnly(['email', 'role', 'updatedAt'])
+        && request.resource.data.email is string
+        && request.resource.data.email.lower() == adminEmail
+        && request.resource.data.role in ['admin', 'super-admin']
+        && (adminEmail != authEmail()
+          || request.resource.data.role == 'super-admin')
+        && request.resource.data.updatedAt is timestamp;
+      allow delete: if isSuperAdmin() && adminEmail != authEmail();
+    }
+
+    match /allowedAccounts/{accountEmail} {
+      allow read: if isAdmin()
+        || (hasVerifiedEmail() && authEmail() == accountEmail);
+      allow create, update: if isAdmin()
+        && request.resource.data.keys().hasOnly(['email', 'addedBy', 'updatedAt'])
+        && request.resource.data.email is string
+        && request.resource.data.email.lower() == accountEmail
+        && request.resource.data.addedBy is string
+        && request.resource.data.addedBy.size() <= 254
+        && request.resource.data.updatedAt is timestamp;
+      allow delete: if isAdmin();
+    }
+
+    match /systemSettings/{settingId} {
+      allow read: if isAllowedAccount();
+      allow write: if isSuperAdmin();
     }
 
     match /{document=**} {
